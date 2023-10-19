@@ -3,8 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from './user.service';
 import { User, UserSchema } from './user.model';
 import { UserController } from './user.controller';
-import { MailerService ,OtpService} from 'src/service/mailer/mailer.service';
+import { MailerService } from 'src/service/mailer/mailer.service';
 import { JwtService } from 'src/service/jwt/jwt.service';
+import { OtpService } from 'src/service/otp/otp.service';
 @Module({
   imports: 
   [

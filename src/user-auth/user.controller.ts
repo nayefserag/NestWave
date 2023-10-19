@@ -4,9 +4,10 @@ import { UserService } from './user.service';
 import * as jwt from 'jsonwebtoken';
 import { User, UserDocument } from './user.model';
 import { UserValidator } from '../middlewares/user.validator';
-import { MailerService ,OtpService} from '../service/mailer/mailer.service';
+import { MailerService } from '../service/mailer/mailer.service';
 import { JwtService } from 'src/service/jwt/jwt.service';
 import { UserUpdates } from 'src/dtos/update-user.dto';
+import { OtpService } from 'src/service/otp/otp.service';
 @Controller('users')
 export class UserController {
   constructor(

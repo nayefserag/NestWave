@@ -8,6 +8,7 @@ import { MailerService } from './service/mailer/mailer.service';
 import { MailerModule } from './service/mailer/mailer.module';
 import { JwtService } from './service/jwt/jwt.service';
 import { JwtModule } from './service/jwt/jwt.module';
+import { OtpService } from './service/otp/otp.service';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -18,6 +19,6 @@ import { JwtModule } from './service/jwt/jwt.module';
 
   ],
   controllers: [AppController],
-  providers: [AppService, MailerService, JwtService],
+  providers: [AppService, MailerService, JwtService, OtpService],
 })
 export class AppModule { }
