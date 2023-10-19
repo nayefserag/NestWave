@@ -19,9 +19,28 @@ export class UserValidator {
     googleId: Joi.string().default(""),
     refreshToken: Joi.array().items(Joi.string()).default([]),
   });
-
+  private static schemaUpdate = Joi.object({
+    name: Joi.string().min(3).max(30),
+    password: Joi.string().min(6),
+    email: Joi.string().email(),
+    profilePicture: Joi.string().allow(""),
+    coverPicture: Joi.string().allow(""),
+    followers: Joi.array().items(Joi.string()),
+    followings: Joi.array().items(Joi.string()),
+    isAdmin: Joi.boolean(),
+    description: Joi.string(),
+    city: Joi.string().max(50),
+    from: Joi.string().max(50),
+    relationship: Joi.number().valid(1, 2, 3),
+    fcmToken: Joi.string(),
+    googleId: Joi.string(),
+    refreshToken: Joi.array().items(Joi.string()),
+  })
   public static validate(user: any): Joi.ValidationResult<any> {
     return this.schema.validate(user);
+  }
+  public static validateUpdate(user: any): Joi.ValidationResult<any> {
+    return this.schemaUpdate.validate(user);
   }
   public static async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);

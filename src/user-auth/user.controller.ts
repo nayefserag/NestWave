@@ -18,7 +18,7 @@ export class UserController {
 
   @Post('/newuser')
   async create(@Body() user: User, @Res() res: Response): Promise<void> {
-    const validation = await UserValidator.validate(user);
+    const validation =  UserValidator.validate(user);
     if (validation.error) {
       res.status(400).json({ error: validation.error.details[0].message });
     }
@@ -32,7 +32,7 @@ export class UserController {
     else {
       const newUser = await this.userService.create(user);
       const token = await this.jwtService.generateToken(newUser,'1h');
-      const refreshToken:string =await this.jwtService.generateToken(newUser,'3d');
+      const refreshToken =await this.jwtService.generateToken(newUser,'3d');
       const otpData = this.otpService.generateOTP()
       newUser.otp = otpData.otp
       newUser.refreshToken = refreshToken
@@ -52,7 +52,6 @@ export class UserController {
   @Post('/verifyotp')
   async verifyOtp(@Body() requestBody: { email: string, otp: string }, @Res() res: Response): Promise<void> {
     const { email, otp } = requestBody; 
-  
     const user = await this.userService.findUser(email);
     if (!user) {
       res.status(404).json("User not found.");
@@ -108,23 +107,35 @@ export class UserController {
     }
   }
 
-  @Patch('/update/:id') //////// this need work
+  @Patch('/update/:id') 
   async updateUser(@Body() user: UserUpdates,@Param('id') id: string ,@Res() res: Response): Promise<void> {
-    const userExist = await this.userService.updateUser(user ,id);
-    if(userExist==null ){
-      res.status(404).json("User Not Found")
-    }
-    else if(userExist instanceof Error){
-      res.status(404).json("Invalid ObjectId")
-    }
 
-    else{
-      console.log(userExist);
-      res.status(200).json(`User Updated Successfully`)
-      
-    }
+    const userExist = await this.userService.findUserById(id);
+    if (userExist === null) {
+      res.status(404).json("User Not Found");
+    } else if (userExist instanceof Error) {
+      res.status(400).json("Invalid ObjectId");
+    } else {
+      const validation = UserValidator.validateUpdate(user);
+
+      if (validation.error) {
+        res.status(400).json({ error: validation.error.details[0].message });
+      } else {
+        if (user.password){
+          user.password = await UserValidator.hashPassword(user.password)
+        }
+        if(user.email){
+          const otpData = this.otpService.generateOTP()
+          this.mailerService.sendOtpEmail(user.email, otpData.otp);
+          user.otp = otpData.otp
+          user.isVerified = false
+        }
+        await this.userService.updateUser(user, id);
+        res.status(200).json("User Updated Successfully");
+      }
     }
   }
+}
 
 
 

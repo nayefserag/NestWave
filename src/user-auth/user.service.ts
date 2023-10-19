@@ -10,12 +10,10 @@ export class UserService {
   async create(user): Promise<User> {
     const newUser = new this.userModel(user);
     newUser.password = await UserValidator.hashPassword(newUser.password)
-    // newUser.otp = otp
-    // newUser.refreshToken = refreshtoken
     return await newUser.save();
   }
   async update(user: User): Promise<User> {
-    const user2 =await this.userModel.findByIdAndUpdate(user._id, user);
+    const user2 =await this.userModel.findByIdAndUpdate(user._id, user, {new: true});
     return user2
   }
 
@@ -29,19 +27,26 @@ export class UserService {
       return user;
 
   }
+  async findUserById(id: string | null ): Promise<Error | User> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return  new Error('Invalid ObjectId');
+     }
+     else{
+       
+     const targetUser =await this.userModel.findById(id);
+      return targetUser;
+
+  }
+}
   async updateUser(data : any, id : string): Promise<User | Error> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
      return  new Error('Invalid ObjectId');
     }
     else{
-    const targetUser =await this.userModel.findByIdAndUpdate(id, data);
-    console.log(targetUser)
+    const targetUser =await this.userModel.findByIdAndUpdate(id, data, {new: true});
     return targetUser
     }
-
-
-
-  }
+}
 
   async updateToken(id :string ,newRefreshToken: string): Promise<User | null |void> {
     await this.userModel.findByIdAndUpdate(id,{refreshToken: newRefreshToken}, {new: true});
