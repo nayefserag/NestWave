@@ -7,7 +7,7 @@ import { MailerService } from 'src/service/mailer/mailer.service';
 import { JwtService } from 'src/service/jwt/jwt.service';
 import { OtpService } from 'src/service/otp/otp.service';
 import { PassportModule } from '@nestjs/passport';
-import { GoogleAuthService } from 'src/config/google-auth';
+import { GoogleAuthService } from 'src/config/google-auth.config';
 
 @Module({
   imports:

@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, Headers } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse } from '@nestjs/swagger'; 
 import { Response } from 'express';
 import { UserService } from './user.service';
 import { User } from './user.model';
@@ -9,6 +10,7 @@ import { UserUpdates } from 'src/dtos/update-user.dto';
 import { OtpService } from 'src/service/otp/otp.service';
 import { AuthGuard } from '@nestjs/passport';
 @Controller('users')
+@ApiTags('Items')
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -18,6 +20,10 @@ export class UserController {
   ) { }
 
   @Post('/newuser')
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiCreatedResponse({ description: 'User created successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async create(@Body() user: User, @Res() res: Response): Promise<void> {
     const validation = UserValidator.validate(user);
     if (validation.error) {
@@ -41,7 +47,7 @@ export class UserController {
         this.mailerService.sendOtpEmail(user.email, otpData.otp);
 
         res.header(process.env.JWT_TOKEN_NAME, token).status(201).json({
-          message: `Welcome ${newUser.name} To My App ^_^`,
+          message: `Welcome ${newUser.name} To My App  We Sent OTP To ${user.email} Please Verify Your Email ^_^`,
           newUser,
           token,
           refreshToken,
@@ -50,7 +56,14 @@ export class UserController {
       }
     }
   }
+
+
   @Post('/verifyotp')
+  @ApiOperation({ summary: 'Verify OTP for a user' })
+  @ApiOkResponse({ description: 'User successfully verified' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async verifyOtp(@Body() requestBody: { email: string, otp: string }, @Res() res: Response): Promise<void> {
     const { email, otp } = requestBody;
     const user = await this.userService.findUser(email);
@@ -71,7 +84,14 @@ export class UserController {
       res.status(401).json("Invalid OTP.");
     }
   }
+
+
   @Get('/login')
+  @ApiOperation({ summary: 'User login' })
+  @ApiOkResponse({ description: 'User logged in successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async findUser(@Body() req: { email: string, password: string }, @Res() res: Response): Promise<void> {
     const user = await this.userService.findUser(req.email)
     if (user == null) {
@@ -102,7 +122,12 @@ export class UserController {
 
   }
 
+
+
   @Get('/allusers')
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiOkResponse({ description: 'Users retrieved successfully' })
+  @ApiNotFoundResponse({ description: 'No users found' })
   async findAll(@Res() res: Response): Promise<void> {
     const users = await this.userService.findAll();
 
@@ -113,7 +138,14 @@ export class UserController {
     }
   }
 
+
+
   @Patch('/update/:id')
+  @ApiOperation({ summary: 'Update a user' })
+  @ApiOkResponse({ description: 'User updated successfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'User not found' })
   async updateUser(@Body() user: UserUpdates, @Param('id') id: string, @Res() res: Response): Promise<void> {
 
     const userExist = await this.userService.findUserById(id);
@@ -142,13 +174,18 @@ export class UserController {
     }
   }
 
+
   @Get('/google')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Login with Google' })
   async googleAuth() {
   }
 
+
+
   @Get('/google/callback')
   @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google authentication callback' })
   async googleAuthRedirect(@Req() req, @Res() res) {
     const user = req.user;
     if (user) {
