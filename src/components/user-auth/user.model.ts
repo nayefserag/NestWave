@@ -53,6 +53,11 @@ export class User extends mongoose.Document {
 
   @Prop({ default: '' })
   otp: string;
+  
+  @Prop({ default: '' })
+  id: string;
+
+
 }
 
 export type UserDocument = User & Document;
