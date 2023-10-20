@@ -1,6 +1,6 @@
-FROM node:18-slim
+FROM node:14
 
-WORKDIR /.
+WORKDIR /Authentication-main/src
 
 COPY package*.json ./
 
@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD [ "npm", "start" ]
+CMD ["npm", "start"]
