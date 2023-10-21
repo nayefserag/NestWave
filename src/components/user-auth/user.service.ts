@@ -1,8 +1,10 @@
 import mongoose, { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserValidator } from '../../middlewares/user.validator';
+import { UserValidator } from '../../Validators/user.validator';
 import { User, UserDocument } from './user.model';
+import { PasswordValidator } from 'src/middlewares/password.validator';
+import { Helpers } from 'src/middlewares/helpers';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) { }
@@ -16,7 +18,7 @@ export class UserService {
 
     }
     else {
-      newUser.password = await UserValidator.hashPassword(newUser.password)
+      newUser.password = await PasswordValidator.hashPassword(newUser.password)
     }
     return await newUser.save();
   }
@@ -36,20 +38,24 @@ export class UserService {
 
   }
   async findUserById(id: string | null): Promise<Error | User> {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return new Error('Invalid ObjectId');
+    if (!mongoose.Types.ObjectId.isValid(id.toString())) {
+      return new Error('Invalid User ObjectId');
     }
     else {
 
       const targetUser = await this.userModel.findById(id);
+      if (targetUser == null)
+      {
+        return new Error('User Not Found');
+      }
       return targetUser;
 
     }
   }
   async updateUser(data: any, id: string): Promise<User | Error> {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return new Error('Invalid ObjectId');
-    }
+    if (!mongoose.Types.ObjectId.isValid(id.toString())) {
+      return new Error('Invalid User ObjectId');
+  }
     else {
       const targetUser = await this.userModel.findByIdAndUpdate(id, data, { new: true });
       return targetUser
@@ -59,7 +65,6 @@ export class UserService {
   async updateToken(id: string, newRefreshToken: string): Promise<User | null | void> {
     await this.userModel.findByIdAndUpdate(id, { refreshToken: newRefreshToken }, { new: true });
   }
-
 
   async googleLogin(req) {
     if (!req.user) {

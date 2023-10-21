@@ -1,16 +1,17 @@
 import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, Headers } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse } from '@nestjs/swagger'; 
+import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
 import { User } from './user.model';
-import { UserValidator } from '../../middlewares/user.validator';
+import { UserValidator } from '../../Validators/user.validator';
+import { PasswordValidator } from '../../middlewares/password.validator';
 import { MailerService } from '../../service/mailer/mailer.service';
 import { JwtService } from 'src/service/jwt/jwt.service';
 import { UserUpdates } from 'src/dtos/update-user.dto';
 import { OtpService } from 'src/service/otp/otp.service';
 import { AuthGuard } from '@nestjs/passport';
 @Controller('users')
-@ApiTags('Items')
+@ApiTags('User Controller')
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -104,7 +105,7 @@ export class UserController {
 
 
     else {
-      const isMatch = await UserValidator.Match(req.password, user.password)
+      const isMatch = await PasswordValidator.Match(req.password, user.password)
       if (isMatch) {
         const token = await this.jwtService.generateToken(user, '1h');
         const refreshToken = await this.jwtService.generateToken(user, '24h');
@@ -160,7 +161,7 @@ export class UserController {
         res.status(400).json({ error: validation.error.details[0].message });
       } else {
         if (user.password) {
-          user.password = await UserValidator.hashPassword(user.password)
+          user.password = await PasswordValidator.hashPassword(user.password)
         }
         if (user.email) {
           const otpData = this.otpService.generateOTP()

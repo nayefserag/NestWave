@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import * as bcrypt from 'bcrypt'
+
 // import { User } from '../user-auth/user.model';
 export class UserValidator {
   private static schema = Joi.object({
@@ -42,15 +42,7 @@ export class UserValidator {
   public static validateUpdate(user: any): Joi.ValidationResult<any> {
     return this.schemaUpdate.validate(user);
   }
-  public static async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt(10);
-    const hasedpassword = bcrypt.hash(password, salt);
-    return hasedpassword;
-  }
-  public static async Match(password1, password2): Promise<boolean> {
-    const isMatch = await bcrypt.compare(password1, password2);
-    return isMatch
-  }
+
 
 
 }
