@@ -38,7 +38,7 @@ export class UserService {
 
   }
   async findUserById(id: string | null): Promise<Error | User> {
-    if (!mongoose.Types.ObjectId.isValid(id.toString())) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return new Error('Invalid User ObjectId');
     }
     else {

@@ -22,7 +22,7 @@ export class Posts extends mongoose.Document {
 
   @ApiProperty({default : []})
   @Prop({default : []})
-  comments: Array<string>;
+    comments: Array<{text : string, userId : string , likes : {number : number, persons : string[]}}>;
 
   @ApiProperty({default : []})
   @Prop({default : []})

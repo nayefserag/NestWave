@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, isValidObjectId } from 'mongoose';
 import { Posts , PostDocument } from './posts.model';
+import { User , UserDocument } from '../user-auth/user.model';
 import { Helpers } from '../../middlewares/helpers';
+import { Comment, CommentDocument } from './comment.model';
 
 @Injectable()
 export class PostsService {
-    constructor(@InjectModel(Posts.name) private readonly PostModel: Model<PostDocument>) { }
+    constructor(
+        @InjectModel(Posts.name) private readonly PostModel: Model<PostDocument>,
+        @InjectModel(Comment.name) private readonly CommentModel: Model<CommentDocument>
+    ) { }
 
 
 async create(post: Posts): Promise<Posts> {
@@ -33,7 +38,7 @@ async findOne(id: string | null): Promise<Posts  | Error> {
 }
 }
 
-async delete(id: string): Promise<Posts> {
+async deletepost(id: string): Promise<Posts> {
     return await this.PostModel.findByIdAndRemove(id);
 }
 
@@ -62,5 +67,12 @@ async findAll(): Promise<Posts[]> {
     return await this.PostModel.find().exec();
 }
 
-
+async addcomment(comment : Comment): Promise<Comment> {
+    const newcomment = new this.CommentModel(comment);
+    await newcomment.save();
+    return newcomment
+}
+async deletecomment(comment): Promise<void> {
+    return await this.CommentModel.findByIdAndRemove(comment._id);
+}
 }
