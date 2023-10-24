@@ -5,12 +5,17 @@ import { UserValidator } from '../../Validators/user.validator';
 import { User, UserDocument } from './user.model';
 import { PasswordValidator } from 'src/middlewares/password.validator';
 import { Helpers } from 'src/middlewares/helpers';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) { }
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
 
-  async create(user): Promise<User> {
+    ) { }
+
+  async create(user : any): Promise<User> {
     const newUser = new this.userModel(user);
+
     if (!user.password) {
       newUser.name = user.name.firstName + ' ' + user.name.lastName;
       newUser.isVerified = true
@@ -30,11 +35,13 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return await this.userModel.find().exec();
   }
-  async findUser(email?: string | null): Promise<User | null> {
-    const user = await this.userModel.findOne({
-      email
-    });
+  async findUser(email?: string | null): Promise<User | Error> {
+    const user = await this.userModel.findOne({email});
+    if (!user) {
+      return new Error('User Not Found');
+    }
     return user;
+
 
   }
   async findUserById(id: string | null): Promise<Error | User> {
@@ -63,24 +70,46 @@ export class UserService {
   }
 
   async deleteUser(id: string): Promise<User | Error> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return new Error('Invalid User ObjectId');
+    }
+    else{
     const targetUser = await this.userModel.findByIdAndDelete(id);
     if (!targetUser) {
       return new Error('User Not Found');
     }
     return targetUser
   }
+}
 
   async updateToken(id: string, newRefreshToken: string): Promise<User | null | void> {
     await this.userModel.findByIdAndUpdate(id, { refreshToken: newRefreshToken }, { new: true });
   }
 
-  async googleLogin(req) {
-    if (!req.user) {
-      return 'No user from google';
-    }
-    else {
-      return { massege: 'user from google', user: req.user };
-    }
-  }
+  // async googleSginIn(user: User): Promise<any> {
+  //   const userExist = await this.findUser(user.email);
+  //   if (userExist instanceof Error) {
+  //     const newUser = await this.create(user);
+  //     // const token = await this.jwtService.generateToken(newUser, '1h');
+  //     // const refreshToken = await this.jwtService.generateToken(newUser, '3d');
+  //     // newUser.refreshToken = refreshToken;
+  //     await newUser.save();
+  //     return {
+  //       message: `Thanks ${newUser.name} To Register In My App ^_^`,
+  //       newUser,
+  //       // token,
+  //       // refreshToken,
+  //     };
+  //   } else {
+  //     // const token = await this.jwtService.generateToken(userExist, '1h');
+  //     // const refreshToken = await this.jwtService.generateToken(userExist, '3d');
+  //     // userExist.refreshToken = refreshToken;
+  //     await userExist.save();
+  //     return {
+  //       // message: `Welcome Again ${user.name.firstName + ' ' + user.name.lastName} To My App ^_^`,
+  //       user: userExist,
+  //     };
+  //   }
+  // }
 
 }

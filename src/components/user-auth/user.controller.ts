@@ -33,11 +33,7 @@ export class UserController {
 
     else {
       const userExist = await this.userService.findUser(user.email);
-      if (userExist != null) {
-        res.status(401).json("This Email User Is Already Exist Try Another Email")
-      }
-
-      else {
+      if (userExist instanceof Error) {
         const newUser = await this.userService.create(user);
         const token = await this.jwtService.generateToken(newUser, '1h');
         const refreshToken = await this.jwtService.generateToken(newUser, '3d');
@@ -55,6 +51,10 @@ export class UserController {
 
         });
       }
+      else {
+        res.status(401).json("This Email Already Exist");
+
+      }
     }
   }
 
@@ -68,10 +68,10 @@ export class UserController {
   async verifyOtp(@Body() requestBody: { email: string, otp: string }, @Res() res: Response): Promise<void> {
     const { email, otp } = requestBody;
     const user = await this.userService.findUser(email);
-    if (!user) {
-      res.status(404).json("User not found.");
+    if (user instanceof Error) {
+      res.status(404).json(user.message);
     }
-
+    else{
     if (otp === user.otp) {
       user.isVerified = true;
       const newUser = await this.userService.update(user);
@@ -85,6 +85,7 @@ export class UserController {
       res.status(401).json("Invalid OTP.");
     }
   }
+}
 
 
   @Get('/login')
@@ -93,10 +94,10 @@ export class UserController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'User not found' })
-  async findUser(@Body() req: { email: string, password: string }, @Res() res: Response): Promise<void> {
+  async login(@Body() req: { email: string, password: string }, @Res() res: Response): Promise<void> {
     const user = await this.userService.findUser(req.email)
-    if (user == null) {
-      res.status(404).json("This Email Not Found")
+    if (user instanceof Error) {
+      res.status(404).json(user.message)
     }
     else if (user.password == undefined) {
       res.status(403).json("Try To Login With Google And Update Your Credentials")
@@ -150,13 +151,12 @@ export class UserController {
   async updateUser(@Body() user: UserUpdates, @Param('id') id: string, @Res() res: Response): Promise<void> {
 
     const userExist = await this.userService.findUserById(id);
-    if (userExist === null) {
-      res.status(404).json("User Not Found");
-    } else if (userExist instanceof Error) {
-      res.status(400).json("Invalid ObjectId");
-    } else {
+    if (userExist instanceof Error) {
+      res.status(404).json(userExist.message);
+    }
+    else {
       const validation = UserValidator.validateUpdate(user);
-
+    
       if (validation.error) {
         res.status(400).json({ error: validation.error.details[0].message });
       } else {
@@ -191,7 +191,22 @@ export class UserController {
     const user = req.user;
     if (user) {
       const userExist = await this.userService.findUser(user.email);
-      if (userExist != null) {
+      if(userExist instanceof Error) {
+        const newUser = await this.userService.create(user);
+        const token = await this.jwtService.generateToken(newUser, '1h');
+        const refreshToken = await this.jwtService.generateToken(newUser, '3d');
+        newUser.refreshToken = refreshToken;
+        await newUser.save();
+        
+        res.header(process.env.JWT_TOKEN_NAME, token).status(201).json({
+          message: `Thanks ${newUser.name} To Register In My App ^_^`,
+          newUser,
+          token,
+          refreshToken,
+
+        })
+      }
+      else{
         const token = await this.jwtService.generateToken(userExist, '1h');
         const refreshToken = await this.jwtService.generateToken(userExist, '3d');
         userExist.refreshToken = refreshToken;
@@ -200,22 +215,6 @@ export class UserController {
           message: `Welcome Again ${user.name.firstName + ' ' + user.name.lastName} To My App ^_^`,
           user,
         });
-      }
-
-      else {
-        const newUser = await this.userService.create(user);
-        const token = await this.jwtService.generateToken(newUser, '1h');
-        const refreshToken = await this.jwtService.generateToken(newUser, '3d');
-        newUser.refreshToken = refreshToken;
-        await newUser.save();
-
-        res.header(process.env.JWT_TOKEN_NAME, token).status(201).json({
-          message: `Thanks ${newUser.name} To Register In My App ^_^`,
-          newUser,
-          token,
-          refreshToken,
-
-        })
       }
     }
 
