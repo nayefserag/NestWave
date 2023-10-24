@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, Headers
 import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
-import { User } from './user.model';
+import { User } from '../../model/user.model';
 import { UserValidator } from '../../Validators/user.validator';
 import { PasswordValidator } from '../../middlewares/password.validator';
 import { MailerService } from '../../service/mailer/mailer.service';
@@ -71,21 +71,21 @@ export class UserController {
     if (user instanceof Error) {
       res.status(404).json(user.message);
     }
-    else{
-    if (otp === user.otp) {
-      user.isVerified = true;
-      const newUser = await this.userService.update(user);
-      const newtoken = await this.jwtService.generateToken(newUser, '1h');
-      const newRefreshToke = await this.jwtService.generateToken(newUser, '3d');
+    else {
+      if (otp === user.otp) {
+        user.isVerified = true;
+        const newUser = await this.userService.update(user);
+        const newtoken = await this.jwtService.generateToken(newUser, '1h');
+        const newRefreshToke = await this.jwtService.generateToken(newUser, '3d');
 
-      await this.userService.updateToken(newUser._id, newRefreshToke);
+        await this.userService.updateToken(newUser._id, newRefreshToke);
 
-      res.setHeader(process.env.REFRESH_TOKEN_NAME, newRefreshToke).setHeader(process.env.JWT_TOKEN_NAME, newtoken).status(200).json("User successfully verified.");
-    } else {
-      res.status(401).json("Invalid OTP.");
+        res.setHeader(process.env.REFRESH_TOKEN_NAME, newRefreshToke).setHeader(process.env.JWT_TOKEN_NAME, newtoken).status(200).json("User successfully verified.");
+      } else {
+        res.status(401).json("Invalid OTP.");
+      }
     }
   }
-}
 
 
   @Get('/login')
@@ -156,7 +156,7 @@ export class UserController {
     }
     else {
       const validation = UserValidator.validateUpdate(user);
-    
+
       if (validation.error) {
         res.status(400).json({ error: validation.error.details[0].message });
       } else {
@@ -191,13 +191,13 @@ export class UserController {
     const user = req.user;
     if (user) {
       const userExist = await this.userService.findUser(user.email);
-      if(userExist instanceof Error) {
+      if (userExist instanceof Error) {
         const newUser = await this.userService.create(user);
         const token = await this.jwtService.generateToken(newUser, '1h');
         const refreshToken = await this.jwtService.generateToken(newUser, '3d');
         newUser.refreshToken = refreshToken;
         await newUser.save();
-        
+
         res.header(process.env.JWT_TOKEN_NAME, token).status(201).json({
           message: `Thanks ${newUser.name} To Register In My App ^_^`,
           newUser,
@@ -206,7 +206,7 @@ export class UserController {
 
         })
       }
-      else{
+      else {
         const token = await this.jwtService.generateToken(userExist, '1h');
         const refreshToken = await this.jwtService.generateToken(userExist, '3d');
         userExist.refreshToken = refreshToken;

@@ -2,7 +2,7 @@ import mongoose, { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserValidator } from '../../Validators/user.validator';
-import { User, UserDocument } from './user.model';
+import { User, UserDocument } from '../../model/user.model';
 import { PasswordValidator } from 'src/middlewares/password.validator';
 import { Helpers } from 'src/middlewares/helpers';
 import { JwtService } from '@nestjs/jwt';
@@ -11,9 +11,9 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
 
-    ) { }
+  ) { }
 
-  async create(user : any): Promise<User> {
+  async create(user: any): Promise<User> {
     const newUser = new this.userModel(user);
 
     if (!user.password) {
@@ -36,7 +36,7 @@ export class UserService {
     return await this.userModel.find().exec();
   }
   async findUser(email?: string | null): Promise<User | Error> {
-    const user = await this.userModel.findOne({email});
+    const user = await this.userModel.findOne({ email });
     if (!user) {
       return new Error('User Not Found');
     }
@@ -51,8 +51,7 @@ export class UserService {
     else {
 
       const targetUser = await this.userModel.findById(id);
-      if (targetUser == null)
-      {
+      if (targetUser == null) {
         return new Error('User Not Found');
       }
       return targetUser;
@@ -62,7 +61,7 @@ export class UserService {
   async updateUser(data: any, id: string): Promise<User | Error> {
     if (!mongoose.Types.ObjectId.isValid(id.toString())) {
       return new Error('Invalid User ObjectId');
-  }
+    }
     else {
       const targetUser = await this.userModel.findByIdAndUpdate(id, data, { new: true });
       return targetUser
@@ -73,14 +72,14 @@ export class UserService {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return new Error('Invalid User ObjectId');
     }
-    else{
-    const targetUser = await this.userModel.findByIdAndDelete(id);
-    if (!targetUser) {
-      return new Error('User Not Found');
+    else {
+      const targetUser = await this.userModel.findByIdAndDelete(id);
+      if (!targetUser) {
+        return new Error('User Not Found');
+      }
+      return targetUser
     }
-    return targetUser
   }
-}
 
   async updateToken(id: string, newRefreshToken: string): Promise<User | null | void> {
     await this.userModel.findByIdAndUpdate(id, { refreshToken: newRefreshToken }, { new: true });

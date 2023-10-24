@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserOperationsController } from './user.operations.controller';
-import { User, UserSchema } from '../user-auth/user.model';
+import { User, UserSchema } from '../../model/user.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from '../user-auth/user.service';
 import { UserModule } from '../user-auth/user.module';
@@ -15,4 +15,4 @@ import { PassportModule } from '@nestjs/passport';
   providers: [UserService, UserOperationsService],
   controllers: [UserOperationsController]
 })
-export class UserOperationsModule {}
+export class UserOperationsModule { }
