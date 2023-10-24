@@ -12,6 +12,8 @@ import { OtpService } from './service/otp/otp.service';
 import { GoogleAuthService } from './config/google-auth.config';
 import { PassportModule } from '@nestjs/passport';
 import { PostsModule } from './components/posts/posts.module';
+import { UserOperationsService } from './components/user.operations/user.operations.service';
+import { UserOperationsModule } from './components/user.operations/user.operations.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -21,9 +23,10 @@ import { PostsModule } from './components/posts/posts.module';
     MailerModule,
     JwtModule,
     PostsModule,
+    UserOperationsModule,
 
   ],
   controllers: [AppController],
-  providers: [AppService, MailerService, JwtService, OtpService, GoogleAuthService],
+  providers: [AppService, MailerService, JwtService, OtpService, GoogleAuthService, UserOperationsService],
 })
 export class AppModule { }

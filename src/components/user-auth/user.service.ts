@@ -62,6 +62,14 @@ export class UserService {
     }
   }
 
+  async deleteUser(id: string): Promise<User | Error> {
+    const targetUser = await this.userModel.findByIdAndDelete(id);
+    if (!targetUser) {
+      return new Error('User Not Found');
+    }
+    return targetUser
+  }
+
   async updateToken(id: string, newRefreshToken: string): Promise<User | null | void> {
     await this.userModel.findByIdAndUpdate(id, { refreshToken: newRefreshToken }, { new: true });
   }
