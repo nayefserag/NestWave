@@ -63,11 +63,14 @@ export class UserExistGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const userId = request.params.id; // Replace with your route parameter
+    const userId = request.params.id;
 
     const userExist = await this.userService.findUserById(userId);
 
     if (userExist instanceof Error) {
+      const errorMessage = userExist.message;
+      const response = context.switchToHttp().getResponse();
+      response.status(404).json({ error: errorMessage });
       return false;
     }
 

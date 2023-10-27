@@ -1,7 +1,9 @@
-import { Controller, Delete, Get, Param, Patch, Res } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Res, UseGuards } from '@nestjs/common';
 import { UserOperationsService } from './user.operations.service';
 import { Response } from 'express';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { UserExistGuard } from 'src/middlewares/user.middleware';
+import { object } from 'joi';
 @ApiTags('User Operations')
 @Controller('user.operations')
 export class UserOperationsController {
@@ -9,18 +11,15 @@ export class UserOperationsController {
 
 
 
-    @Delete('/deleteprofile/:profileid')
+    @Delete('/deleteprofile/:id')
+    @UseGuards(UserExistGuard)
     @ApiOperation({ summary: 'Delete a user profile' })
-    @ApiParam({ name: 'profileid', description: 'Profile ID to delete' })
-    async deleteprofile(@Param('profileid') profileid: string, @Res() res: Response): Promise<void> {
-        const user = await this.userOperationsService.delete(profileid);
-        if (user instanceof Error) {
-            res.status(404).json(user.message);
-        }
-        else {
-            res.status(200).json(user);
-        }
+    @ApiParam({ name: 'id', description: 'Profile ID to delete' })
+    async deleteprofile(@Param('id') id: string, @Res() res: Response): Promise<void> {
+        const user = await this.userOperationsService.delete(id);
+        res.status(200).json(user);
     }
+
 
     @Patch('/follow/:currentuser/:followeduser')
     @ApiOperation({ summary: 'Follow a user' })
@@ -36,15 +35,13 @@ export class UserOperationsController {
         }
     }
 
-    @Get('/getfollowers/:currentuser')
+    @Get('/getfollowers/:id')
+    @UseGuards(UserExistGuard)
     @ApiOperation({ summary: 'Get followers of a user' })
-    @ApiParam({ name: 'currentuser', description: 'User to get followers for' })
-    async getfollowers(@Param('currentuser') currentuser: string, @Res() res: Response): Promise<void> {
-        const user = await this.userOperationsService.getfollowers(currentuser);
-        if (user instanceof Error) {
-            res.status(404).json(user.message);
-        }
-        else if (user.length == 0) {
+    @ApiParam({ name: 'id', description: 'User to get followers for' })
+    async getfollowers(@Param('id') id: string, @Res() res: Response): Promise<void> {
+        const user = await this.userOperationsService.getfollowers(id);
+        if (Array.isArray(user) && user.length === 0) {
             {
                 res.status(200).json("No followers");
             }
@@ -55,15 +52,13 @@ export class UserOperationsController {
     }
 
 
-    @Get('/getfollowings/:currentuser')
+    @Get('/getfollowings/:id')
+    @UseGuards(UserExistGuard)
     @ApiOperation({ summary: 'Get followings of a user' })
-    @ApiParam({ name: 'currentuser', description: 'User to get followings for' })
-    async getfollowings(@Param('currentuser') currentuser: string, @Res() res: Response): Promise<void> {
-        const user = await this.userOperationsService.getfollowings(currentuser);
-        if (user instanceof Error) {
-            res.status(404).json(user.message);
-        }
-        else if (user.length == 0) {
+    @ApiParam({ name: 'id', description: 'User to get followings for' })
+    async getfollowings(@Param('id') id: string, @Res() res: Response): Promise<void> {
+        const user = await this.userOperationsService.getfollowings(id);
+        if (Array.isArray(user) && user.length === 0) {
             {
                 res.status(200).json("No followings");
             }
