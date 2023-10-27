@@ -20,7 +20,7 @@ export class PostsService {
         return newPost;
     }
 
-    async findOne(id: string | null): Promise<Posts | Error> {
+    async findOne(id: string | null): Promise<any | Error> {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return new Error('Invalid Post ID');
         }

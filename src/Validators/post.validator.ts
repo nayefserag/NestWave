@@ -2,7 +2,7 @@ import * as Joi from 'joi';
 
 export class PostValidator {
   private static schema = Joi.object({
-    userId : Joi.string().required(),
+    userId : Joi.string(),
     post : Joi.string().required().max(450).min(1),
     Image : Joi.array().items(Joi.string()),
     video : Joi.array().items(Joi.string()),
@@ -11,7 +11,7 @@ export class PostValidator {
     hashtags : Joi.array().items(Joi.string()),
   });
   private static schemaUpdate = Joi.object({
-    userId : Joi.string().required(),
+    userId : Joi.string(),
     post : Joi.string().max(450).min(1),
     Image : Joi.array().items(Joi.string()),
     video : Joi.array().items(Joi.string()),

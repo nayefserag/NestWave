@@ -4,8 +4,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Schema()
 export class Posts extends mongoose.Document {
-  @ApiProperty({ required: true })
-  @Prop({ required: true })
+  @ApiProperty()
+  @Prop()
   userId: string;
 
   @ApiProperty({ required: true })
