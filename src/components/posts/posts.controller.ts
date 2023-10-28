@@ -12,6 +12,8 @@ import { CommentUpdates } from 'src/dtos/update.comment.dto';
 import { PostExistGuard, PostUpdateValidationGuard, PostValidationGuard } from 'src/middlewares/post.middleware';
 import { CommentUpdateValidationGuard, CommentValidationGuard } from 'src/middlewares/comment.middleware';
 import { ExistGuard } from 'src/guards/exist.guard';
+import { ValidationGuard } from 'src/guards/validator.guard';
+
 @Controller('posts')
 @ApiTags('Post Controller')
 export class PostsController {
@@ -22,7 +24,7 @@ export class PostsController {
 
     @Post('newpost/:id')
     @UseGuards(ExistGuard(UserService))
-    @UseGuards(PostValidationGuard)
+    @UseGuards(new ValidationGuard(PostValidator))
     @ApiOperation({ summary: 'Create a new post' })
     @ApiBody({ type: Posts })
     @ApiResponse({ status: 201, description: 'Post Created' })
