@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, Headers, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param  } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
@@ -10,7 +10,8 @@ import { JwtService } from 'src/service/jwt/jwt.service';
 import { UserUpdates } from 'src/dtos/update-user.dto';
 import { OtpService } from 'src/service/otp/otp.service';
 import { AuthGuard } from '@nestjs/passport';
-import { UserExistGuard, UserUpdateValidationGuard, UserValidationGuard } from 'src/middlewares/user.middleware';
+import { ExistGuard } from 'src/guards/exist.guard';
+import { ValidationGuard } from 'src/guards/validator.guard';
 @Controller('users')
 @ApiTags('User Controller')
 export class UserController {
@@ -22,7 +23,7 @@ export class UserController {
   ) { }
 
   @Post('/newuser')
-  @UseGuards(UserValidationGuard)
+  @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
   @ApiOperation({ summary: 'Create a new user' })
   @ApiCreatedResponse({ description: 'User created successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -139,8 +140,8 @@ export class UserController {
 
 
   @Patch('/update/:id')
-  @UseGuards(UserExistGuard)
-  @UseGuards(UserUpdateValidationGuard)
+  @UseGuards(ExistGuard(UserService))
+  @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: true }))
   @ApiOperation({ summary: 'Update a user' })
   @ApiOkResponse({ description: 'User updated successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })

@@ -9,10 +9,10 @@ import { PostValidator } from 'src/Validators/post.validator';
 import { UserService } from '../user-auth/user.service';
 import { Comment } from '../../model/comment.model';
 import { CommentUpdates } from 'src/dtos/update.comment.dto';
-import { PostExistGuard, PostUpdateValidationGuard, PostValidationGuard } from 'src/middlewares/post.middleware';
-import { CommentUpdateValidationGuard, CommentValidationGuard } from 'src/middlewares/comment.middleware';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
+import { CommentValidator } from 'src/Validators/comment.validator';
+
 
 @Controller('posts')
 @ApiTags('Post Controller')
@@ -24,7 +24,8 @@ export class PostsController {
 
     @Post('newpost/:id')
     @UseGuards(ExistGuard(UserService))
-    @UseGuards(new ValidationGuard(PostValidator))
+    @UseGuards(new ValidationGuard({ validator: PostValidator, validatorupdate: false }))
+
     @ApiOperation({ summary: 'Create a new post' })
     @ApiBody({ type: Posts })
     @ApiResponse({ status: 201, description: 'Post Created' })
@@ -41,8 +42,8 @@ export class PostsController {
     }
 
     @Patch('update/:id')
-    @UseGuards(PostExistGuard)
-    @UseGuards(PostUpdateValidationGuard)
+    @UseGuards(ExistGuard(PostsService))
+    @UseGuards(new ValidationGuard({ validator: PostValidator, validatorupdate: true }))
     @ApiOperation({ summary: 'Update a post' })
     @ApiBody({ type: PostUpdates })
     @ApiParam({ name: 'id', description: 'Post ID' })
@@ -70,7 +71,7 @@ export class PostsController {
     }
 
     @Delete('delete/:id')
-    @UseGuards(PostExistGuard)
+    @UseGuards(ExistGuard(PostsService))
     @ApiOperation({ summary: 'Delete a post' })
     @ApiParam({ name: 'postid', description: 'Post ID' })
     @ApiResponse({ status: 201, description: 'Post Deleted By Admin' })
@@ -101,7 +102,7 @@ export class PostsController {
     }
 
     @Get('getpost/:id')
-    @UseGuards(PostExistGuard)
+    @UseGuards(ExistGuard(PostsService))
     @ApiOperation({ summary: 'Get a post by ID' })
     @ApiParam({ name: 'postid', description: 'Post ID' })
     @ApiResponse({ status: 200, description: 'Success' })
@@ -113,7 +114,7 @@ export class PostsController {
     }
 
     @Patch('react/:id')
-    @UseGuards(PostExistGuard)
+    @UseGuards(ExistGuard(PostsService))
     @ApiOperation({ summary: 'React to a post' })
     @ApiParam({ name: 'id', description: 'Post ID' })
     @ApiBody({ type: Comment })
@@ -142,8 +143,8 @@ export class PostsController {
     }
 
     @Patch('addcomment/:id')
-    @UseGuards(PostExistGuard)
-    @UseGuards(CommentValidationGuard)
+    @UseGuards(ExistGuard(PostsService))
+    @UseGuards(new ValidationGuard({ validator: CommentValidator, validatorupdate: false }))
     @ApiOperation({ summary: 'Add a comment to a post' })
     @ApiParam({ name: 'postid', description: 'Post ID' })
     @ApiBody({ type: Comment })
@@ -166,7 +167,7 @@ export class PostsController {
     }
 
     @Delete('deletecomment/:id/:commentid')
-    @UseGuards(PostExistGuard)
+    @UseGuards(ExistGuard(PostsService))
     @ApiOperation({ summary: 'Delete a comment' })
     @ApiParam({ name: 'postid', description: 'Post ID' })
     @ApiParam({ name: 'commentid', description: 'Comment ID' })
@@ -189,7 +190,7 @@ export class PostsController {
 
 
     @Get('getcomments/:id')
-    @UseGuards(PostExistGuard)
+    @UseGuards(ExistGuard(PostsService))
     @ApiOperation({ summary: 'Get comments for a post' })
     @ApiParam({ name: 'postid', description: 'Post ID' })
     @ApiResponse({ status: 200, description: 'Success' })
@@ -201,7 +202,7 @@ export class PostsController {
     }
 
     @Patch('reactcomment/:id/:commentid/:userid')
-    @UseGuards(PostExistGuard)
+    @UseGuards(ExistGuard(PostsService))
     @ApiOperation({ summary: 'React to a comment' })
     @ApiParam({ name: 'id', description: 'Post ID' })
     @ApiParam({ name: 'commentid', description: 'Comment ID' })
@@ -238,8 +239,8 @@ export class PostsController {
 
 
     @Patch('updatecomment/:id/:commentid')
-    @UseGuards(PostExistGuard)
-    @UseGuards(CommentUpdateValidationGuard)
+    @UseGuards(ExistGuard(PostsService))
+    @UseGuards(new ValidationGuard({ validator: CommentValidator, validatorupdate: true }))
     @ApiOperation({ summary: 'Update a comment' })
     @ApiParam({ name: 'id', description: 'Post ID' })
     @ApiParam({ name: 'commentid', description: 'Comment ID' })

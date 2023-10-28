@@ -8,10 +8,14 @@ import { JwtService } from 'src/service/jwt/jwt.service';
 import { OtpService } from 'src/service/otp/otp.service';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleAuthService } from 'src/config/google-auth.config';
+import { Comment, CommentSchema } from 'src/model/comment.model';
+import { PostSchema, Posts } from 'src/model/posts.model';
 
 @Module({
   imports:
     [
+      MongooseModule.forFeature([{ name: Posts.name, schema: PostSchema }]),
+      MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
       MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       PassportModule.register({ defaultStrategy: 'google' }),
     ],

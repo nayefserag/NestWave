@@ -1,15 +1,19 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ValidationGuard implements CanActivate {
-  constructor(private readonly validator: any) {}
+  constructor(private options: ValidationGuardOptions) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const entity = request.body;
-
-    const validation = this.validator.validate(entity);
-
+    let validation :any
+    if(this.options.validatorupdate){
+        validation = this.options.validator.validateUpdate(entity);
+    }
+    else{
+     validation = this.options.validator.validate(entity);
+    }
     if (validation.error) {
       const response = context.switchToHttp().getResponse();
       response.status(400).json({ error: validation.error.details[0].message });
@@ -18,4 +22,8 @@ export class ValidationGuard implements CanActivate {
 
     return true;
   }
+}
+export interface ValidationGuardOptions {
+  validator: any;
+  validatorupdate?: boolean;
 }

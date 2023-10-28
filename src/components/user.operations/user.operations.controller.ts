@@ -2,17 +2,17 @@ import { Controller, Delete, Get, Param, Patch, Res, UseGuards } from '@nestjs/c
 import { UserOperationsService } from './user.operations.service';
 import { Response } from 'express';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { UserExistGuard } from 'src/middlewares/user.middleware';
-import { object } from 'joi';
+import { ExistGuard } from 'src/guards/exist.guard';
+import { UserService } from '../user-auth/user.service';
 @ApiTags('User Operations')
 @Controller('user.operations')
 export class UserOperationsController {
-    constructor(private readonly userOperationsService: UserOperationsService) { }
-
-
+    constructor(
+        private readonly userOperationsService: UserOperationsService,
+        private readonly userService: UserService,) { }
 
     @Delete('/deleteprofile/:id')
-    @UseGuards(UserExistGuard)
+    @UseGuards(ExistGuard(UserService))
     @ApiOperation({ summary: 'Delete a user profile' })
     @ApiParam({ name: 'id', description: 'Profile ID to delete' })
     async deleteprofile(@Param('id') id: string, @Res() res: Response): Promise<void> {
@@ -36,7 +36,7 @@ export class UserOperationsController {
     }
 
     @Get('/getfollowers/:id')
-    @UseGuards(UserExistGuard)
+    @UseGuards(ExistGuard(UserService))
     @ApiOperation({ summary: 'Get followers of a user' })
     @ApiParam({ name: 'id', description: 'User to get followers for' })
     async getfollowers(@Param('id') id: string, @Res() res: Response): Promise<void> {
@@ -53,7 +53,7 @@ export class UserOperationsController {
 
 
     @Get('/getfollowings/:id')
-    @UseGuards(UserExistGuard)
+    @UseGuards(ExistGuard(UserService))
     @ApiOperation({ summary: 'Get followings of a user' })
     @ApiParam({ name: 'id', description: 'User to get followings for' })
     async getfollowings(@Param('id') id: string, @Res() res: Response): Promise<void> {
