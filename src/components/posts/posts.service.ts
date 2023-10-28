@@ -9,7 +9,7 @@ import { Comment, CommentDocument } from '../../model/comment.model';
 @Injectable()
 export class PostsService {
     constructor(
-        @InjectModel(Posts.name) private readonly PostModel: Model<PostDocument>,
+        @InjectModel(Posts.name) public  PostModel: Model<PostDocument>,
         @InjectModel(Comment.name) private readonly CommentModel: Model<CommentDocument>
     ) { }
 
@@ -20,11 +20,14 @@ export class PostsService {
         return newPost;
     }
 
-    async findOne(id: string | null): Promise<any | Error> {
+    async findByid(id: string,model?:any ): Promise<any | Error> {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return new Error('Invalid Post ID');
         }
         else {
+            if (model) {
+                this.PostModel =model;
+            }
             const post = await this.PostModel.findById(id);
             if (post == null) {
                 return new Error('Post Not Found');

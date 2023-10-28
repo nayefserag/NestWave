@@ -8,6 +8,7 @@ import { UserModule } from '../user-auth/user.module';
 import { User, UserSchema } from '../../model/user.model';
 import { Comment, CommentSchema } from '../../model/comment.model';
 
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Posts.name, schema: PostSchema }]),

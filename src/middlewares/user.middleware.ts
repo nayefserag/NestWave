@@ -1,4 +1,3 @@
-// user-validation.guard.ts
 import { Injectable, CanActivate, ExecutionContext, Param } from '@nestjs/common';
 import { UserValidator } from 'src/Validators/user.validator';
 import { UserService } from 'src/components/user-auth/user.service';
@@ -48,7 +47,7 @@ export class UserExistGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const userId = request.params.id;
 
-    const userExist = await this.userService.findUserById(userId);
+    const userExist = await this.userService.findByid(userId);
 
     if (userExist instanceof Error) {
       const errorMessage = userExist.message;

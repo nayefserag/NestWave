@@ -21,8 +21,8 @@ export class UserOperationsService {
         if (currentuser == followeduser) {
             return new Error('You cannot follow yourself');
         }
-        const user = await this.userService.findUserById(currentuser);
-        const targetUser = await this.userService.findUserById(followeduser);
+        const user = await this.userService.findByid(currentuser);
+        const targetUser = await this.userService.findByid(followeduser);
         if (user instanceof Error) {
             return new Error('User Not Found');
         }
@@ -64,7 +64,7 @@ export class UserOperationsService {
     }
 
     async getfollowers(currentuser: string): Promise<string[] | Error> {
-        const user = await this.userService.findUserById(currentuser);
+        const user = await this.userService.findByid(currentuser);
         if (user instanceof Error) {
             return new Error('User Not Found');
         }
@@ -74,7 +74,7 @@ export class UserOperationsService {
     }
 
     async getfollowings(currentuser: string): Promise<string[] | Error> {
-        const user = await this.userService.findUserById(currentuser);
+        const user = await this.userService.findByid(currentuser);
         if (user instanceof Error) {
             return new Error('User Not Found');
         }

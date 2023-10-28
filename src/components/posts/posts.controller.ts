@@ -10,18 +10,18 @@ import { UserService } from '../user-auth/user.service';
 import { Comment } from '../../model/comment.model';
 import { CommentUpdates } from 'src/dtos/update.comment.dto';
 import { PostExistGuard, PostUpdateValidationGuard, PostValidationGuard } from 'src/middlewares/post.middleware';
-import { UserExistGuard } from 'src/middlewares/user.middleware';
 import { CommentUpdateValidationGuard, CommentValidationGuard } from 'src/middlewares/comment.middleware';
+import { ExistGuard } from 'src/guards/exist.guard';
 @Controller('posts')
 @ApiTags('Post Controller')
 export class PostsController {
     constructor(
         private readonly postService: PostsService,
-        private readonly userService: UserService,
+        public readonly userService: UserService,
     ) { }
 
     @Post('newpost/:id')
-    @UseGuards(UserExistGuard)
+    @UseGuards(ExistGuard(UserService))
     @UseGuards(PostValidationGuard)
     @ApiOperation({ summary: 'Create a new post' })
     @ApiBody({ type: Posts })
@@ -48,7 +48,7 @@ export class PostsController {
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiResponse({ status: 403, description: 'Unauthorized' })
     async update(@Body() post: PostUpdates, @Param('id') id: string, @Res() res: Response): Promise<void> {
-        const author = await this.userService.findUserById(post.userId);
+        const author = await this.userService.findByid(post.userId);
         if (author instanceof Error) {
             res.status(400).json(author.message);
         }
@@ -76,8 +76,8 @@ export class PostsController {
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiResponse({ status: 403, description: 'Unauthorized' })
     async delete(@Param('id') id: string, @Body() req: any, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
-        const author = await this.userService.findUserById(req.userId);
+        const targetPost = await this.postService.findByid(id);
+        const author = await this.userService.findByid(req.userId);
         if (author instanceof Error) {
             res.status(400).json(author.message);
         }
@@ -105,7 +105,7 @@ export class PostsController {
     @ApiResponse({ status: 200, description: 'Success' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async find(@Param('id') id: string, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
+        const targetPost = await this.postService.findByid(id);
         res.status(200).json(targetPost);
 
     }
@@ -119,8 +119,8 @@ export class PostsController {
     @ApiResponse({ status: 200, description: 'Post UnLiked' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async react(@Param('id') id: string, @Body() req: any, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
-        const user = await this.userService.findUserById(req.userId);
+        const targetPost = await this.postService.findByid(id);
+        const user = await this.userService.findByid(req.userId);
         if (user instanceof Error) {
             res.status(400).json(user.message);
         }
@@ -148,8 +148,8 @@ export class PostsController {
     @ApiResponse({ status: 201, description: 'Comment Added' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async addcomment(@Param('id') id: string, @Body() req: Comment, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
-        const user = await this.userService.findUserById(req.userId);
+        const targetPost = await this.postService.findByid(id);
+        const user = await this.userService.findByid(req.userId);
         if (user instanceof Error) {
             res.status(400).json(user.message);
         }
@@ -172,7 +172,7 @@ export class PostsController {
     @ApiResponse({ status: 404, description: 'Comment not found' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async deleteComment(@Param('id') id: string, @Param('commentid') commentid: string, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
+        const targetPost = await this.postService.findByid(id);
         const commentIndex = targetPost.comments.findIndex((comment: Comment) => { return comment._id.toString() === commentid; })
 
         if (commentIndex === -1) {
@@ -193,7 +193,7 @@ export class PostsController {
     @ApiResponse({ status: 200, description: 'Success' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async getComments(@Param('id') id: string, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
+        const targetPost = await this.postService.findByid(id);
         res.status(200).json(targetPost.comments);
 
     }
@@ -209,7 +209,7 @@ export class PostsController {
     @ApiResponse({ status: 404, description: 'Comment not found' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async reactcomment(@Param('id') id: string, @Param('userid') userid: string, @Param('commentid') commentid: string, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
+        const targetPost = await this.postService.findByid(id);
         if (targetPost instanceof Error) {
             res.status(400).json(targetPost.message);
         } else {
@@ -246,7 +246,7 @@ export class PostsController {
     @ApiResponse({ status: 404, description: 'Comment not found' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     async updatecomment(@Param('id') id: string, @Param('commentid') commentid: string, @Body() req: CommentUpdates, @Res() res: Response): Promise<void> {
-        const targetPost = await this.postService.findOne(id);
+        const targetPost = await this.postService.findByid(id);
         const commentIndex = targetPost.comments.findIndex((comment: Comment) => { return comment._id.toString() === commentid; })
         if (commentIndex === -1) {
             res.status(404).json({ error: 'Comment not found' });

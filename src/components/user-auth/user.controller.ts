@@ -22,11 +22,11 @@ export class UserController {
   ) { }
 
   @Post('/newuser')
+  @UseGuards(UserValidationGuard)
   @ApiOperation({ summary: 'Create a new user' })
   @ApiCreatedResponse({ description: 'User created successfully' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @UseGuards(UserValidationGuard)
   async create(@Body() user: User, @Res() res: Response): Promise<void> {
 
     const userExist = await this.userService.findUser(user.email);

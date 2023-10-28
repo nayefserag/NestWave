@@ -9,9 +9,9 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-
-  ) { }
+    @InjectModel(User.name) public  userModel: Model<UserDocument>,
+    
+  ) {  }
 
   async create(user: any): Promise<User> {
     const newUser = new this.userModel(user);
@@ -44,20 +44,24 @@ export class UserService {
 
 
   }
-  async findUserById(id: string | null): Promise<Error | User> {
+  async findByid(id: string | null ,model?:any): Promise<Error | User> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return new Error('Invalid User ObjectId');
     }
     else {
-
+        if (model) {
+          this.userModel =model;
+        }
       const targetUser = await this.userModel.findById(id);
-      if (targetUser == null) {
+      console.log(targetUser)
+      if (targetUser === null || targetUser === undefined) {
         return new Error('User Not Found');
       }
       return targetUser;
 
     }
   }
+
   async updateUser(data: any, id: string): Promise<User | Error> {
     if (!mongoose.Types.ObjectId.isValid(id.toString())) {
       return new Error('Invalid User ObjectId');
