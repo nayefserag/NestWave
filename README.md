@@ -54,7 +54,7 @@ $ docker run -p 3000:80 CycleSync-Image
 
 ## Note 
 
-- to see all apis click here[here](http://localhost:3000/apis) after you do the two steps 
+- to see all apis click [here](http://localhost:3000/apis) after you do the two steps 
 <!-- ## Running the app
 
 ```bash
