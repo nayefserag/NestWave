@@ -40,11 +40,11 @@ export class User extends mongoose.Document {
   @Prop({ default: '' })
   description: string;
 
-  @ApiProperty({ maxLength: 50 }) // Use 'maxLength' instead of 'maxlength'
+  @ApiProperty({ maxLength: 50 }) 
   @Prop({ maxlength: 50 })
   city: string;
 
-  @ApiProperty({ maxLength: 50 }) // Use 'maxLength' instead of 'maxlength'
+  @ApiProperty({ maxLength: 50 }) 
   @Prop({ maxlength: 50 })
   from: string;
 

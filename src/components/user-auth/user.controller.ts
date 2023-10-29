@@ -51,7 +51,7 @@ export class UserController {
       });
     }
     else {
-      res.status(409).json("This Email Already Exist");
+      res.status(409).json({message:"This Email Already Exist" ,statusCode : 409});
 
     }
 
@@ -65,8 +65,8 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad Request' }) 
   @ApiResponse({ status: 401, description: 'Unauthorized' }) 
   @ApiResponse({ status: 404, description: 'User not found' })
-  async verifyOtp(@Body() requestBody: { email: string, otp: string }, @Res() res: Response): Promise<void> {
-    const { email, otp } = requestBody;
+  async verifyOtp(@Body() req: { email: string, otp: string }, @Res() res: Response): Promise<void> {
+    const { email, otp } = req;
     const user = await this.userService.findUser(email);
       if (otp === user.otp) {
         user.isVerified = true;
