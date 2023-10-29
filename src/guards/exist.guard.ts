@@ -20,6 +20,7 @@ export function ExistGuard(entityServiceType: Type<any>) {
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const request = context.switchToHttp().getRequest();
       const entityId = request.params.id;
+      const entityemail = request.body.email;
       let model: any;
       if (this.entityService.constructor.name == 'UserService') {
 
@@ -28,8 +29,11 @@ export function ExistGuard(entityServiceType: Type<any>) {
       else  {
         model = this.PostModel
       }
-      const entityExist = await this.entityService.findByid(entityId, model);
-
+      var entityExist = await this.entityService.findByid(entityId, model);
+      if (entityemail) {
+         entityExist = await this.entityService.findUser(entityemail, model);
+      }
+      
       if (entityExist instanceof Error) {
         throw new NotFoundException(entityExist.message);
       }

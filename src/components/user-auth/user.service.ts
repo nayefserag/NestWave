@@ -35,7 +35,10 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return await this.userModel.find().exec();
   }
-  async findUser(email?: string | null): Promise<User | Error> {
+  async findUser(email?: string | null ,model?:any): Promise<User | Error | any> {
+    if (model) {
+      this.userModel =model;
+    }
     const user = await this.userModel.findOne({ email });
     if (!user) {
       return new Error('User Not Found');
