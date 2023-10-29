@@ -56,7 +56,6 @@ export class UserService {
           this.userModel =model;
         }
       const targetUser = await this.userModel.findById(id);
-      console.log(targetUser)
       if (targetUser === null || targetUser === undefined) {
         return new Error('User Not Found');
       }

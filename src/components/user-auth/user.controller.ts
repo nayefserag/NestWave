@@ -127,7 +127,7 @@ export class UserController {
     if (users.length === 0) {
       res.status(200).json({ message: 'No users found' , statusCode : 200});
     } else {
-      res.status(200).json({Users:users , statusCode : 200});
+      res.status(200).json({message:users , statusCode : 200});
     }
   }
 
