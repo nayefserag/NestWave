@@ -16,7 +16,7 @@ export class ValidationGuard implements CanActivate {
     }
     if (validation.error) {
       const response = context.switchToHttp().getResponse();
-      response.status(400).json({ error: validation.error.details[0].message });
+      response.status(400).json({ message: validation.error.details[0].message , statusCode : 400});
       return false;
     }
 
