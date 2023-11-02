@@ -17,11 +17,11 @@ export class User extends mongoose.Document {
   password: string;
 
   @ApiProperty()
-  @Prop({ default: '' })
+  @Prop({ default: 'https://firebasestorage.googleapis.com/v0/b/nest-js-403723.appspot.com/o/images%2FprofilePicture%2Fdefault%20profile%20picture.png?alt=media&token=a7ec71d0-3076-4d6d-90cc-6098ac784f13' })
   profilePicture: string;
 
   @ApiProperty()
-  @Prop({ default: '' })
+  @Prop({ default: 'https://firebasestorage.googleapis.com/v0/b/nest-js-403723.appspot.com/o/images%2FcoverPicture%2Fdefault%20cover%20picture.jpg?alt=media&token=374ecc00-08b5-4681-95d0-50da67b52023' })
   coverPicture: string;
 
   @ApiProperty({ type: [String], default: [] })

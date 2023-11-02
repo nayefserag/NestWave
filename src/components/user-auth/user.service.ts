@@ -4,9 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../../model/user.model';
 import { PasswordValidator } from 'src/middlewares/password.validator';
 import { initializeFirebase } from 'src/config/firebase.config';
-import { Multer } from 'multer';
-import { getStorage , ref , uploadBytesResumable , getDownloadURL} from 'firebase/storage'
-initializeFirebase();
+
 @Injectable()
 export class UserService {
   constructor(
