@@ -3,6 +3,7 @@
 /node_modules
 /secrets
 /.env
+/uploads
 # Logs
 logs
 *.log
