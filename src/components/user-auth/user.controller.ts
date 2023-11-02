@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param ,UseInterceptors, UploadedFile  } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse,ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
@@ -12,6 +12,8 @@ import { OtpService } from 'src/service/otp/otp.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
+import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { Multer } from 'multer';
 @Controller('users')
 @ApiTags('User Controller')
 export class UserController {
@@ -19,21 +21,23 @@ export class UserController {
     private readonly userService: UserService,
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
-    private readonly otpService: OtpService
+    private readonly otpService: OtpService,
   ) { }
 
   @Post('/newuser')
-  @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
+  // @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
+  @UseInterceptors(FileInterceptor('profilePicture'))
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' }) 
   @ApiResponse({ status: 409, description: 'Email already exists' }) 
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiOperation({ summary: 'Create a new user' })
-  async create(@Body() req:User, @Res() res: Response): Promise<void> {
-
+  async create(
+    @Body() req:User, @Res() res: Response,
+    @UploadedFile() profilePicture?): Promise<void> {
     const userExist = await this.userService.findUser(req.email);
     if (userExist instanceof Error) {
-      const newUser = await this.userService.create(req);
+      const newUser = await this.userService.create(req,profilePicture);
       const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
       const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
       const otpData = this.otpService.generateOTP()
@@ -41,6 +45,7 @@ export class UserController {
       newUser.refreshToken = refreshToken
       await newUser.save()
       this.mailerService.sendOtpEmail(req.email, otpData.otp);
+
 
       res.header(process.env.JWT_TOKEN_NAME, token).status(201).json({
         message: `Welcome ${newUser.name} To My App  We Sent OTP To ${req.email} Please Verify Your Email ^_^`,

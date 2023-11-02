@@ -10,6 +10,8 @@ import { PassportModule } from '@nestjs/passport';
 import { GoogleAuthService } from 'src/config/google-auth.config';
 import { Comment, CommentSchema } from 'src/model/comment.model';
 import { PostSchema, Posts } from 'src/model/posts.model';
+import { MulterModule } from '@nestjs/platform-express';
+
 
 @Module({
   imports:
@@ -18,6 +20,8 @@ import { PostSchema, Posts } from 'src/model/posts.model';
       MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
       MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
       PassportModule.register({ defaultStrategy: 'google' }),
+
+      
     ],
   providers: [UserService, MailerService, OtpService, JwtService, GoogleAuthService],
   controllers: [UserController],
