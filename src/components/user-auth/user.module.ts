@@ -10,7 +10,7 @@ import { PassportModule } from '@nestjs/passport';
 import { GoogleAuthService } from 'src/config/google-auth.config';
 import { Comment, CommentSchema } from 'src/model/comment.model';
 import { PostSchema, Posts } from 'src/model/posts.model';
-import { MulterModule } from '@nestjs/platform-express';
+import { FirebaseService } from 'src/service/firebase/firebase.service';
 
 
 @Module({
@@ -23,7 +23,7 @@ import { MulterModule } from '@nestjs/platform-express';
 
       
     ],
-  providers: [UserService, MailerService, OtpService, JwtService, GoogleAuthService],
+  providers: [UserService, MailerService, OtpService, JwtService, GoogleAuthService,FirebaseService],
   controllers: [UserController],
   exports: [UserService],
 })

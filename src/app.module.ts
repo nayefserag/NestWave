@@ -14,6 +14,7 @@ import { PassportModule } from '@nestjs/passport';
 import { PostsModule } from './components/posts/posts.module';
 import { UserOperationsService } from './components/user.operations/user.operations.service';
 import { UserOperationsModule } from './components/user.operations/user.operations.module';
+import { FirebaseService } from './service/firebase/firebase.service';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -27,6 +28,6 @@ import { UserOperationsModule } from './components/user.operations/user.operatio
 
   ],
   controllers: [AppController],
-  providers: [AppService, MailerService, JwtService, OtpService, GoogleAuthService, UserOperationsService],
+  providers: [AppService, MailerService, JwtService, OtpService, GoogleAuthService, UserOperationsService, FirebaseService],
 })
 export class AppModule { }

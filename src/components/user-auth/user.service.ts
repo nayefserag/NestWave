@@ -5,8 +5,6 @@ import { User, UserDocument } from '../../model/user.model';
 import { PasswordValidator } from 'src/middlewares/password.validator';
 import { initializeFirebase } from 'src/config/firebase.config';
 import { Multer } from 'multer';
-import { UUID } from 'mongodb';
-import * as path from 'path';
 import { getStorage , ref , uploadBytesResumable , getDownloadURL} from 'firebase/storage'
 initializeFirebase();
 @Injectable()
@@ -16,12 +14,8 @@ export class UserService {
     
   ) {  }
 
-  async create(user: any ,profilePicture?: any ): Promise<User> {
+  async create(user: any ): Promise<User> {
     const newUser = new this.userModel(user);
-    if (profilePicture) {
-      newUser.profilePicture = await this.uploadImageToFirebase(profilePicture ,newUser._id ,'profilePicture')
-      
-    }
     if (!user.password) {
       newUser.name = user.name.firstName + ' ' + user.name.lastName;
       newUser.isVerified = true
@@ -32,19 +26,6 @@ export class UserService {
       newUser.password = await PasswordValidator.hashPassword(newUser.password)
     }
     return await newUser.save();
-  }
-
-
-  async uploadImageToFirebase(image: Multer.File,id :string , type: string) : Promise<any> {
-
-    const storage = getStorage();
-    const storageref = ref (storage, `images/${type}/user_${id}`);
-    const metadata = {
-      contentType: image.mimetype,
-    }
-    const snapshot = await uploadBytesResumable(storageref, image.buffer, metadata);
-    const url = await getDownloadURL(snapshot.ref);
-    return url;
   }
 
   async update(user: User): Promise<User> {

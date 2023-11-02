@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
-import { Multer } from 'multer';
+import { FirebaseService } from 'src/service/firebase/firebase.service';
 @Controller('users')
 @ApiTags('User Controller')
 export class UserController {
@@ -22,6 +22,7 @@ export class UserController {
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
+    private readonly firebaseService: FirebaseService
   ) { }
 
   @Post('/newuser')
@@ -37,7 +38,8 @@ export class UserController {
     @UploadedFile() profilePicture?): Promise<void> {
     const userExist = await this.userService.findUser(req.email);
     if (userExist instanceof Error) {
-      const newUser = await this.userService.create(req,profilePicture);
+      const newUser = await this.userService.create(req);
+      newUser.profilePicture = await this.firebaseService.uploadImageToFirebase(profilePicture ,newUser._id ,'profilePicture')
       const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
       const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
       const otpData = this.otpService.generateOTP()
