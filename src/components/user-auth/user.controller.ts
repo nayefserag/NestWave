@@ -39,7 +39,9 @@ export class UserController {
     const userExist = await this.userService.findUser(req.email);
     if (userExist instanceof Error) {
       const newUser = await this.userService.create(req);
-      newUser.profilePicture = await this.firebaseService.uploadImageToFirebase(profilePicture ,newUser._id ,'profilePicture')
+      if (profilePicture) {
+        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase(profilePicture, newUser._id, 'profilePicture');
+      }
       const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
       const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
       const otpData = this.otpService.generateOTP()
