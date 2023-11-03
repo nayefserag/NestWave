@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, UseInterceptors, UploadedFile, UploadedFiles, Headers } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse,ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
 import { User } from '../../model/user.model';
@@ -12,7 +12,7 @@ import { OtpService } from 'src/service/otp/otp.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express/multer';
+import { FileFieldsInterceptor } from '@nestjs/platform-express/multer';
 import { FirebaseService } from 'src/service/firebase/firebase.service';
 @Controller('users')
 @ApiTags('User Controller')
@@ -26,7 +26,7 @@ export class UserController {
   ) { }
 
   @Post('/newuser')
-  @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
+  // @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'profilePicture', maxCount: 1 },
     { name: 'coverPicture', maxCount: 1 },
