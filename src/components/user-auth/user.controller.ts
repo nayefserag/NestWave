@@ -241,6 +241,50 @@ export class UserController {
     }
   }
 
+
+
+
+  @Post('/request-reset')
+  @ApiOperation({ summary: 'Request a password reset' })
+  @ApiResponse({ status: 200, description: 'Password reset request sent successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async requestPasswordReset(@Body() req: { email: string }, @Res() res: Response): Promise<void> {
+    const user = await this.userService.findUser(req.email);
+    if (user instanceof Error) {
+      res.status(404).json({ message: 'User not found' });
+    }
+    else {
+      const resetcode = this.otpService.generateOTP()
+      await this.mailerService.sendPasswordResetEmail(user.email, resetcode.otp);
+      user.resetcode = resetcode.otp
+      await user.save();
+      res.status(200).json({ message: 'Password reset request sent successfully' });
+    }
+  }
+
+  @Post('/reset-password')
+  @ApiOperation({ summary: 'Reset a password' })
+  @ApiResponse({ status: 200, description: 'Password reset successful' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async resetPassword(@Body() req: { email: string, password: string , resetcode : string}, @Res() res: Response): Promise<void> {
+    const user = await this.userService.findUser(req.email);
+    if (user instanceof Error) {
+      res.status(404).json({ message: 'User not found' });
+    }
+    else if (user.resetcode != req.resetcode) {
+      res.status(400).json({ message: 'Invalid reset code' });
+    }
+    else {
+      user.password = await PasswordValidator.hashPassword(req.password);
+      await user.save();
+      res.status(200).json({ message: 'Password reset successful' });
+    }
+  }
+
 }
 
 

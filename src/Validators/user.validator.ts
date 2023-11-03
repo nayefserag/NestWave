@@ -18,6 +18,10 @@ export class UserValidator {
     fcmToken: Joi.string(),
     googleId: Joi.string().default(""),
     refreshToken: Joi.array().items(Joi.string()).default([]),
+    isVerified: Joi.boolean().default(false),
+    otp: Joi.string(),
+    id: Joi.string(),
+    resetcode: Joi.string()
   });
   private static schemaUpdate = Joi.object({
     name: Joi.string().min(3).max(30),
@@ -35,6 +39,10 @@ export class UserValidator {
     fcmToken: Joi.string(),
     googleId: Joi.string(),
     refreshToken: Joi.array().items(Joi.string()),
+    isVerified: Joi.boolean(),
+    otp: Joi.string(),
+    id: Joi.string(),
+    resetcode: Joi.string()
   })
   public static validate(user: any): Joi.ValidationResult<any> {
     return this.schema.validate(user);

@@ -75,6 +75,10 @@ export class User extends mongoose.Document {
   @ApiProperty()
   @Prop({ default: '' })
   id: string;
+
+  @ApiProperty()
+  @Prop({ default: '' })
+  resetcode: string;
 }
 
 export type UserDocument = User & Document;
