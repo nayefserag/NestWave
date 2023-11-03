@@ -5,7 +5,7 @@ import { initializeFirebase } from 'src/config/firebase.config';
 initializeFirebase();
 @Injectable()
 export class FirebaseService {
- async uploadImageToFirebase(image: Multer.File,id :string , type: string) : Promise<any> {
+ async uploadImageToFirebase(image: Express.Multer.File,id :string , type: string) : Promise<any> {
 
         const storage = getStorage();
         const storageref = ref (storage, `images/${type}/user_${id}`);

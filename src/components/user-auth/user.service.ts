@@ -63,7 +63,7 @@ export class UserService {
     }
   }
 
-  async updateUser(data: any, id: string): Promise<User | Error> {
+  async updateUser(data: any, id: string ): Promise<User | Error> {
     if (!mongoose.Types.ObjectId.isValid(id.toString())) {
       return new Error('Invalid User ObjectId');
     }

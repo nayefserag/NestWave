@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param ,UseInterceptors, UploadedFile  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, UseInterceptors, UploadedFile, UploadedFiles, Headers } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiCreatedResponse, ApiBadRequestResponse, ApiNotFoundResponse, ApiUnauthorizedResponse, ApiOkResponse,ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
@@ -12,7 +12,7 @@ import { OtpService } from 'src/service/otp/otp.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
-import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express/multer';
 import { FirebaseService } from 'src/service/firebase/firebase.service';
 @Controller('users')
 @ApiTags('User Controller')
@@ -26,21 +26,28 @@ export class UserController {
   ) { }
 
   @Post('/newuser')
-  // @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
-  @UseInterceptors(FileInterceptor('profilePicture'))
+  @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: false }))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'profilePicture', maxCount: 1 },
+    { name: 'coverPicture', maxCount: 1 },
+  ]))
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' }) 
   @ApiResponse({ status: 409, description: 'Email already exists' }) 
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiOperation({ summary: 'Create a new user' })
   async create(
-    @Body() req:User, @Res() res: Response,
-    @UploadedFile() profilePicture?): Promise<void> {
+    @Body() req:User,
+    @Res() res: Response,
+    @UploadedFiles() files: { profilePicture?: Express.Multer.File[], coverPicture?: Express.Multer.File[] }): Promise<void> {
     const userExist = await this.userService.findUser(req.email);
     if (userExist instanceof Error) {
       const newUser = await this.userService.create(req);
-      if (profilePicture) {
-        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase(profilePicture, newUser._id, 'profilePicture');
+      if (files.profilePicture) {
+        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase(files.profilePicture[0], newUser._id, 'profilePicture');
+      }
+      if (files.coverPicture) {
+        newUser.coverPicture = await this.firebaseService.uploadImageToFirebase(files.coverPicture[0], newUser._id, 'coverPicture');
       }
       const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
       const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
@@ -145,12 +152,21 @@ export class UserController {
   @Patch('/update/:id')
   @UseGuards(ExistGuard(UserService))
   @UseGuards(new ValidationGuard({ validator: UserValidator, validatorupdate: true }))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'profilePicture', maxCount: 1 },
+    { name: 'coverPicture', maxCount: 1 },
+  ]))
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiOperation({ summary: 'Update a user' })
-  async updateUser(@Body() user: UserUpdates, @Param('id') id: string, @Res() res: Response): Promise<void> {
+  async updateUser(
+    @Body() user: UserUpdates, 
+    @Param('id') id: string, 
+    @Res() res: Response,
+    @UploadedFiles() files: { profilePicture?: Express.Multer.File[], coverPicture?: Express.Multer.File[] },
+    ): Promise<void> {
     if (user.password) {
       user.password = await PasswordValidator.hashPassword(user.password)
     }
@@ -160,7 +176,14 @@ export class UserController {
       user.otp = otpData.otp
       user.isVerified = false
     }
+    if (files.profilePicture) {
+      user.profilePicture = await this.firebaseService.uploadImageToFirebase(files.profilePicture[0], id, 'profilePicture');
+    }
+    if (files.coverPicture) {
+      user.coverPicture = await this.firebaseService.uploadImageToFirebase(files.coverPicture[0], id, 'coverPicture');
+    }
     await this.userService.updateUser(user, id);
+
     res.status(200).json({message:"User Updated Successfully" , statusCode: 200});
   }
 
