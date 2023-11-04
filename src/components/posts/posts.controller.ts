@@ -146,6 +146,9 @@ export class PostsController {
             targetPost.comments.push(comment);
             await targetPost.save();
             const updatedPost = await this.postService.updatepost(targetPost, id);
+            const notifiedUser = await this.userService.findByid(targetPost.userId);    
+            const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "Post Liked", `${user.name} liked your post`);
+            console.log("notification:",notification);
             res.status(201).json({ message: "Comment Added", statusCode: 201 });
     }
 
@@ -209,6 +212,9 @@ export class PostsController {
                     targetPost.comments[commentIndex].likes.persons.push(userid);
                     targetPost.comments[commentIndex].likes.number += 1;
                     const updatedPost = await this.postService.updatepost(targetPost, targetPost._id.toString());
+                    const notifiedUser = await this.userService.findByid(targetPost.comments[commentIndex].userId);    
+                    const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "Comment Liked", `your comment liked`);
+                    console.log("notification:",notification);
                     res.status(200).json({ message: 'Comment liked', statusCode: 200 });
                 } else {
                     targetPost.comments[commentIndex].likes.persons.splice(userIndex, 1);

@@ -4,11 +4,15 @@ import { Response } from 'express';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { UserService } from '../user-auth/user.service';
+import { FirebaseService } from 'src/service/firebase/firebase.service';
+
 @ApiTags('User Operations')
 @Controller('user.operations')
 export class UserOperationsController {
     constructor(
         private readonly userOperationsService: UserOperationsService,
+        private readonly firebaseService: FirebaseService,
+        private readonly userService: UserService
     ) { }
 
     @Delete('/deleteprofile/:id')
@@ -35,6 +39,9 @@ export class UserOperationsController {
             res.status(400).json({message : user.message , statusCode: 400});
         }
         else {
+            const notifiedUser = await this.userService.findByid(followeduser);    
+            const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "New Follower", `User followed you`);
+            console.log("notification:",notification);
             res.status(200).json({message:user , statusCode: 200});
         }
     }
