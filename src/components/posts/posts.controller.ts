@@ -12,6 +12,7 @@ import { CommentUpdates } from 'src/dtos/update.comment.dto';
 import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
 import { CommentValidator } from 'src/Validators/comment.validator';
+import { FirebaseService } from 'src/service/firebase/firebase.service';
 
 
 @Controller('posts')
@@ -20,6 +21,7 @@ export class PostsController {
     constructor(
         private readonly postService: PostsService,
         public readonly userService: UserService,
+        private readonly firebaseService: FirebaseService
     ) { }
 
     @Post('newpost/:id')
@@ -113,12 +115,15 @@ export class PostsController {
         const user = await this.userService.findByid(req.userId);
             if (targetPost.likes.includes(user._id.toString())) {
                 targetPost.likes = targetPost.likes.filter((userId) => userId !== user._id.toString());
-                const updatedPost = await this.postService.updatepost(targetPost, id);
+                await this.postService.updatepost(targetPost, id);
                 res.status(200).json({ message: "Post UnLiked", statusCode: 200 });
             }
             else {
                 targetPost.likes.push(user._id.toString());
                 const updatedPost = await this.postService.updatepost(targetPost, id);
+                const notifiedUser = await this.userService.findByid(targetPost.userId);    
+                const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "Post Liked", `${user.name} liked your post`);
+                console.log(notification);
                 res.status(201).json({ message: "Post Liked", statusCode: 201 });
             }
     }

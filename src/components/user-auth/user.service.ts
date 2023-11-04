@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../../model/user.model';
 import { PasswordValidator } from 'src/middlewares/password.validator';
-import { initializeFirebase } from 'src/config/firebase.config';
 
 @Injectable()
 export class UserService {
@@ -69,6 +68,7 @@ export class UserService {
     }
     else {
       const targetUser = await this.userModel.findByIdAndUpdate(id, data, { new: true });
+      await targetUser.save();
       return targetUser
     }
   }

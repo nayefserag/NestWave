@@ -53,7 +53,7 @@ export class User extends mongoose.Document {
   relationship: number;
 
   @ApiProperty()
-  @Prop()
+  @Prop({ default: '' })
   fcmToken: string;
 
   @ApiProperty()
@@ -79,6 +79,7 @@ export class User extends mongoose.Document {
   @ApiProperty()
   @Prop({ default: '' })
   resetcode: string;
+
 }
 
 export type UserDocument = User & Document;

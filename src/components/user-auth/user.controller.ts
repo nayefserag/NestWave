@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse ,ApiParam} from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
 import { User } from '../../model/user.model';
@@ -283,6 +283,23 @@ export class UserController {
       await user.save();
       res.status(200).json({ message: 'Password reset successful' });
     }
+  }
+
+
+
+
+  @Patch('/getFcmToken/:id')
+  @UseGuards(ExistGuard(UserService))
+  @ApiOperation({ summary: 'Get FCM Token' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'FCM Token updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async getFcmToken(@Param('id') id: string, @Body() req: { fcmToken: string }, @Res() res: Response): Promise<void> {
+    const user = await this.userService.findByid(id);
+      user.fcmToken = req.fcmToken;
+      await user.save();
+      res.status(200).json({ message: 'FCM Token updated successfully' });
   }
 
 }

@@ -7,6 +7,7 @@ import { UserService } from '../user-auth/user.service';
 import { UserModule } from '../user-auth/user.module';
 import { User, UserSchema } from '../../model/user.model';
 import { Comment, CommentSchema } from '../../model/comment.model';
+import { FirebaseService } from 'src/service/firebase/firebase.service';
 
 
 @Module({
@@ -16,7 +17,7 @@ import { Comment, CommentSchema } from '../../model/comment.model';
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     UserModule
   ],
-  providers: [PostsService, UserService],
+  providers: [PostsService, UserService,FirebaseService],
   controllers: [PostsController],
 })
 export class PostsModule { }
