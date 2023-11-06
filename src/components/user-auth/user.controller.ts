@@ -44,10 +44,10 @@ export class UserController {
     if (userExist instanceof Error) {
       const newUser = await this.userService.create(req);
       if (files.profilePicture) {
-        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase(files.profilePicture[0], newUser._id, 'profilePicture');
+        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.profilePicture[0], newUser._id, 'profilePicture');
       }
       if (files.coverPicture) {
-        newUser.coverPicture = await this.firebaseService.uploadImageToFirebase(files.coverPicture[0], newUser._id, 'coverPicture');
+        newUser.coverPicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.coverPicture[0], newUser._id, 'coverPicture');
       }
       const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
       const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
@@ -177,10 +177,10 @@ export class UserController {
       user.isVerified = false
     }
     if (files.profilePicture) {
-      user.profilePicture = await this.firebaseService.uploadImageToFirebase(files.profilePicture[0], id, 'profilePicture');
+      user.profilePicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.profilePicture[0], id, 'profilePicture');
     }
     if (files.coverPicture) {
-      user.coverPicture = await this.firebaseService.uploadImageToFirebase(files.coverPicture[0], id, 'coverPicture');
+      user.coverPicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.coverPicture[0], id, 'coverPicture');
     }
     await this.userService.updateUser(user, id);
 

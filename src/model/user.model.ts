@@ -17,11 +17,11 @@ export class User extends mongoose.Document {
   password: string;
 
   @ApiProperty()
-  @Prop({ default: 'https://firebasestorage.googleapis.com/v0/b/nest-js-403723.appspot.com/o/images%2FprofilePicture%2Fdefault%20profile%20picture.png?alt=media&token=a7ec71d0-3076-4d6d-90cc-6098ac784f13' })
+  @Prop({ default: 'https://firebasestorage.googleapis.com/v0/b/nest-js-403723.appspot.com/o/User_Images%2FprofilePicture%2Fdefault%20profile%20picture.png?alt=media&token=3751aa6d-24ac-4af8-8eef-c4ab28284720&_gl=1*1xcwewc*_ga*NTk3MDYwNjQwLjE2ODE4MzI3NDQ.*_ga_CW55HF8NVT*MTY5OTI2NTY1NS41My4xLjE2OTkyNjgwMjguMzkuMC4w' })
   profilePicture: string;
 
   @ApiProperty()
-  @Prop({ default: 'https://firebasestorage.googleapis.com/v0/b/nest-js-403723.appspot.com/o/images%2FcoverPicture%2Fdefault%20cover%20picture.jpg?alt=media&token=374ecc00-08b5-4681-95d0-50da67b52023' })
+  @Prop({ default: 'https://firebasestorage.googleapis.com/v0/b/nest-js-403723.appspot.com/o/User_Images%2FcoverPicture%2Fdefault%20cover%20picture.jpg?alt=media&token=880d1309-0620-4a2a-b192-2a7c82df8374&_gl=1*uoum4w*_ga*NTk3MDYwNjQwLjE2ODE4MzI3NDQ.*_ga_CW55HF8NVT*MTY5OTI2NTY1NS41My4xLjE2OTkyNjgwNDQuMjMuMC4w' })
   coverPicture: string;
 
   @ApiProperty({ type: [String], default: [] })
