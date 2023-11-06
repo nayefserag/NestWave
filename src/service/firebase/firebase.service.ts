@@ -14,7 +14,7 @@ export class FirebaseService {
     
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
-        const storageref = ref (storage, `${foldername}/${type}/user_${id}`);
+        const storageref = ref (storage, `${foldername}/${type}/${type}_${id}`);
         const metadata = {
           contentType: image.mimetype,
         }
@@ -23,18 +23,36 @@ export class FirebaseService {
         return url;
       }
 
+  async uploadImagesToFirebase(foldername: string, images: Express.Multer.File[], id: string, type: string): Promise<string[]> {
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const urls: string[] = [];
+  
+    for (const image of images) {
+      const storageref = ref(storage, `${foldername}/${type}/user_${id}/${image.originalname}`);
+      const metadata = {
+        contentType: image.mimetype,
+      };
+  
+      const snapshot = await uploadBytesResumable(storageref, image.buffer, metadata);
+      const url = await getDownloadURL(snapshot.ref);
+      urls.push(url);
+    }
+    return urls;
+  }
       async sendNotification(userToken: string, title: string, body: string) {
         try {
-          const notification :Message= {
+
+          const fcmPayload :admin.messaging.Message = {
+            token: userToken,
             notification: {
               title: title,
-              body: body,
+              body: body
             },
-            token: userToken,
-            topic: 'New_Notification',
           };
           
-          const response = await firebaseAdmin.messaging().send(notification);
+          
+          const response = await admin.messaging().send(fcmPayload);
           console.log('Notification sent successfully:', response);
           return response;
         } catch (error) {

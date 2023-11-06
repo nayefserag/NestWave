@@ -45,7 +45,7 @@ export class UserService {
 
 
   }
-  async findByid(id: string | null ,model?:any): Promise<Error | User | any> {
+  async findByid(id: string | null ,model?:any): Promise<Error | any> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return new Error('Invalid User ObjectId');
     }
