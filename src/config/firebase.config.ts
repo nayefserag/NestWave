@@ -6,7 +6,7 @@
 // };
 
 import * as admin from 'firebase-admin';
-import * as serviceAccount from '../../secrets/firebaseconfig.json';
+// import * as serviceAccount from '../../secrets/firebaseconfig.json';
 export const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN, 
@@ -18,10 +18,10 @@ export const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+//   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+// });
 
 export const firebaseAdmin = admin;
 
