@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Helpers } from '../../middlewares/helpers';
@@ -14,6 +14,7 @@ import { ValidationGuard } from 'src/guards/validator.guard';
 import { CommentValidator } from 'src/Validators/comment.validator';
 import { FirebaseService } from 'src/service/firebase/firebase.service';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { I18n, I18nContext } from 'nestjs-i18n';
 
 
 @Controller('posts')
@@ -37,21 +38,24 @@ export class PostsController {
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiResponse({ status: 403, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async create(@Body() post: Posts, @UploadedFiles() files: { images?: Express.Multer.File[] , videos?: Express.Multer.File[] }, @Param('id') id: string, @Res() res: Response): Promise<void> {
+    async create(
+        @Body() post: Posts, 
+        @UploadedFiles() files: { images?: Express.Multer.File[], videos?: Express.Multer.File[] }, 
+        @Param('id') id: string, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const hashtags = await Helpers.extractHashtags(post.post);
         const newpost = await this.postService.create(post);
         newpost.userId = id;
-        if (files.images && files.images.length > 0)
-        {
-        newpost.Image = await this.firebaseService.uploadImagesToFirebase('Posts_Images', files.images, id, 'post');
+        if (files.images && files.images.length > 0) {
+            newpost.Image = await this.firebaseService.uploadImagesToFirebase('Posts_Images', files.images, id, 'post');
         }
-        if (files.videos && files.videos.length > 0)
-        {
-        newpost.video = await this.firebaseService.uploadImagesToFirebase('Posts_Videos', files.videos, id, 'post');
+        if (files.videos && files.videos.length > 0) {
+            newpost.video = await this.firebaseService.uploadImagesToFirebase('Posts_Videos', files.videos, id, 'post');
         }
         newpost.save();
         const updatedpost = await this.postService.updatehashtags(newpost._id, hashtags);
-        res.status(201).json({ message: "Post Created", statusCode: 201 });
+        res.status(201).json({ message: i18n.t('content.POST_CREATE_SUCCESSFULLY'), statusCode: 201 });
 
     }
 
@@ -65,14 +69,18 @@ export class PostsController {
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiResponse({ status: 403, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async update(@Body() post: PostUpdates, @Param('id') id: string, @Res() res: Response): Promise<void> {
+    async update(
+        @Body() post: PostUpdates, 
+        @Param('id') id: string, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const author = await this.userService.findByid(post.userId);
         if (post.userId !== author._id.toString()) {
-            res.status(403).json({ message: "Unauthorized", statusCode: 403 });
+            res.status(403).json({ message: i18n.t('content.UNAUTHORIZED'), statusCode: 403 });
         }
         else {
             const updatedpost = await this.postService.updatepost(post, id);
-            res.status(201).json({ message: "Post Updated", statusCode: 201 });
+            res.status(201).json({ message: i18n.t('content.POST_UPDATED_SUCCESSFULLY'), statusCode: 201 });
         }
     }
 
@@ -84,19 +92,23 @@ export class PostsController {
     @ApiResponse({ status: 200, description: 'Post Deleted' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
     @ApiResponse({ status: 403, description: 'Unauthorized' })
-    async delete(@Param('id') id: string, @Body() req: any, @Res() res: Response): Promise<void> {
+    async delete(
+        @Param('id') id: string, 
+        @Body() req: any, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const targetPost = await this.postService.findByid(id);
         const author = await this.userService.findByid(req.userId);
         if (targetPost.userId !== author._id.toString() && author.isAdmin == false) {
-            res.status(403).json({ message: "Unauthorized", statusCode: 403 });
+            res.status(403).json({ message: i18n.t('content.UNAUTHORIZED'), statusCode: 403 });
         }
         else {
             const updatedpost = await this.postService.deletepost(id);
             if (author.isAdmin == true) {
-                res.status(201).json({ message: "Post Deleted By Admin", statusCode: 201 });
+                res.status(201).json({ message: i18n.t('content.POST_DELETED_BY_ADMIN'), statusCode: 201 });
             }
             else {
-                res.status(201).json({ message: "Post Deleted", statusCode: 201 });
+                res.status(201).json({ message: i18n.t('content.POST_DELETED_SUCCESSFULLY'), statusCode: 201 });
             }
         }
     }
@@ -121,7 +133,11 @@ export class PostsController {
     @ApiResponse({ status: 201, description: 'Post Liked' })
     @ApiResponse({ status: 200, description: 'Post UnLiked' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
-    async react(@Param('id') id: string, @Body() req: any, @Res() res: Response): Promise<void> {
+    async react(
+        @Param('id') id: string, 
+        @Body() req: any, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const targetPost = await this.postService.findByid(id);
         const user = await this.userService.findByid(req.userId);
         if (user instanceof Error) {
@@ -130,7 +146,7 @@ export class PostsController {
         else if (targetPost.likes.includes(user._id.toString())) {
             targetPost.likes = targetPost.likes.filter((userId) => userId !== user._id.toString());
             await this.postService.updatepost(targetPost, id);
-            res.status(200).json({ message: "Post UnLiked", statusCode: 200 });
+            res.status(200).json({ message: i18n.t('content.POST_LIKED'), statusCode: 200 });
         }
         else {
             targetPost.likes.push(user._id.toString());
@@ -138,7 +154,7 @@ export class PostsController {
             const notifiedUser = await this.userService.findByid(targetPost.userId);
             const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "Post Liked", `${user.name} liked your post`);
             console.log(notification);
-            res.status(201).json({ message: "Post Liked", statusCode: 201 });
+            res.status(201).json({ message: i18n.t('content.POST_UNLIKED'), statusCode: 201 });
         }
     }
 
@@ -153,7 +169,11 @@ export class PostsController {
     @ApiResponse({ status: 404, description: 'Post not found' })
     @ApiResponse({ status: 422, description: 'Validation failed' })
 
-    async addcomment(@Param('id') id: string, @Body() req: Comment, @Res() res: Response): Promise<void> {
+    async addcomment(
+        @Param('id') id: string, 
+        @Body() req: Comment, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const targetPost = await this.postService.findByid(id);
         const user = await this.userService.findByid(req.userId);
         const comment = await this.postService.addcomment(req);
@@ -163,7 +183,7 @@ export class PostsController {
         const notifiedUser = await this.userService.findByid(targetPost.userId);
         const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "Post Liked", `${user.name} liked your post`);
         console.log("notification:", notification);
-        res.status(201).json({ message: "Comment Added", statusCode: 201 });
+        res.status(201).json({ message: i18n.t('content.COMMENT_ADDED'), statusCode: 201 });
     }
 
     @Delete('deletecomment/:id/:commentid')
@@ -174,16 +194,20 @@ export class PostsController {
     @ApiResponse({ status: 200, description: 'Comment deleted' })
     @ApiResponse({ status: 404, description: 'Comment not found' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
-    async deleteComment(@Param('id') id: string, @Param('commentid') commentid: string, @Res() res: Response): Promise<void> {
+    async deleteComment(
+        @Param('id') id: string, 
+        @Param('commentid') commentid: string, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const targetPost = await this.postService.findByid(id);
         const commentIndex = targetPost.comments.findIndex((comment: Comment) => { return comment._id.toString() === commentid; })
 
         if (commentIndex === -1) {
-            res.status(404).json({ error: 'Comment not found' });
+            res.status(404).json({ message: i18n.t('content.COMMENT_NOT_FOUND'), statusCode: 404 });
         } else {
             targetPost.comments.splice(commentIndex, 1);
             await targetPost.save();
-            res.status(200).json({ message: 'Comment deleted', statusCode: 200 });
+            res.status(200).json({ message: i18n.t('content.COMMENT_DELETED'), statusCode: 200 });
         }
 
     }
@@ -215,11 +239,16 @@ export class PostsController {
     @ApiResponse({ status: 200, description: 'Comment unliked' })
     @ApiResponse({ status: 404, description: 'Comment not found' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
-    async reactcomment(@Param('id') id: string, @Param('userid') userid: string, @Param('commentid') commentid: string, @Res() res: Response): Promise<void> {
+    async reactcomment(
+        @Param('id') id: string, 
+        @Param('userid') userid: string, 
+        @Param('commentid') commentid: string, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const targetPost = await this.postService.findByid(id);
         const commentIndex = targetPost.comments.findIndex((comment: Comment) => { return comment._id.toString() === commentid; })
         if (commentIndex === -1) {
-            res.status(404).json({ message: 'Comment not found', statusCode: 404 });
+            res.status(404).json({ message: i18n.t('content.COMMENT_NOT_FOUND'), statusCode: 404 });
         } else {
             const userIndex = targetPost.comments[commentIndex].likes.persons.findIndex((userId: string) => { return userId === userid; })
             if (userIndex === -1) {
@@ -229,12 +258,12 @@ export class PostsController {
                 const notifiedUser = await this.userService.findByid(targetPost.comments[commentIndex].userId);
                 const notification = await this.firebaseService.sendNotification(notifiedUser.fcmToken, "Comment Liked", `your comment liked`);
                 console.log("notification:", notification);
-                res.status(200).json({ message: 'Comment liked', statusCode: 200 });
+                res.status(200).json({ message: i18n.t('content.COMMENT_LIKED'), statusCode: 200 });
             } else {
                 targetPost.comments[commentIndex].likes.persons.splice(userIndex, 1);
                 targetPost.comments[commentIndex].likes.number -= 1;
                 const updatedPost = await this.postService.updatepost(targetPost, targetPost._id.toString());
-                res.status(200).json({ message: 'Comment unliked', statusCode: 200 });
+                res.status(200).json({ message: i18n.t('content.COMMENT_UNLIKED'), statusCode: 200 });
             }
 
         }
@@ -252,15 +281,20 @@ export class PostsController {
     @ApiResponse({ status: 404, description: 'Comment not found' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
 
-    async updatecomment(@Param('id') id: string, @Param('commentid') commentid: string, @Body() req: CommentUpdates, @Res() res: Response): Promise<void> {
+    async updatecomment(
+        @Param('id') id: string, 
+        @Param('commentid') commentid: string, 
+        @Body() req: CommentUpdates, 
+        @Res() res: Response,
+        @I18n() i18n: I18nContext): Promise<void> {
         const targetPost = await this.postService.findByid(id);
         const commentIndex = targetPost.comments.findIndex((comment: Comment) => { return comment._id.toString() === commentid; })
         if (commentIndex === -1) {
-            res.status(404).json({ message: 'Comment not found', statusCode: 404 });
+            res.status(404).json({ message: i18n.t('content.COMMENT_NOT_FOUND'), statusCode: 404 });
         } else {
             targetPost.comments[commentIndex].text = req.text;
             const updatedPost = await this.postService.updatepost(targetPost, targetPost._id.toString());
-            res.status(200).json({ message: 'Comment updated', statusCode: 200 });
+            res.status(200).json({ message: i18n.t('content.COMMENT_UPDATED'), statusCode: 200 });
         }
 
     }

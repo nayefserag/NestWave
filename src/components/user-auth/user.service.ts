@@ -3,12 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../../model/user.model';
 import { PasswordValidator } from 'src/middlewares/password.validator';
+import { I18nService , I18nContext } from 'nestjs-i18n';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) public  userModel: Model<UserDocument>,
-    
+    private readonly i18n: I18nService
   ) {  }
 
   async create(user: any ): Promise<User> {
@@ -33,12 +34,12 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return await this.userModel.find().exec();
   }
-  async findUser(email?: string | null ,model?:any): Promise<User | Error | any> {
+  async findUser(email?: string | null ,model?:any,lang?:string): Promise<User | Error | any> {
     if (model) {
       this.userModel =model;
     }
     const user = await this.userModel.findOne({ email });
-    if (!user) {
+    if (!user || user === null) {
       return new Error('User Not Found');
     }
     return user;

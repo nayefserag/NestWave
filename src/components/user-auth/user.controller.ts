@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Res, Req, UseGuards, Patch, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse ,ApiParam} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UserService } from './user.service';
 import { User } from '../../model/user.model';
@@ -14,6 +14,8 @@ import { ExistGuard } from 'src/guards/exist.guard';
 import { ValidationGuard } from 'src/guards/validator.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express/multer';
 import { FirebaseService } from 'src/service/firebase/firebase.service';
+import { I18nService } from 'nestjs-i18n';
+import { I18n, I18nContext } from 'nestjs-i18n';
 @Controller('users')
 @ApiTags('User Controller')
 export class UserController {
@@ -22,7 +24,8 @@ export class UserController {
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
-    private readonly firebaseService: FirebaseService
+    private readonly firebaseService: FirebaseService,
+    private readonly i18n: I18nService
   ) { }
 
   @Post('/newuser')
@@ -32,22 +35,23 @@ export class UserController {
     { name: 'coverPicture', maxCount: 1 },
   ]))
   @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' }) 
-  @ApiResponse({ status: 409, description: 'Email already exists' }) 
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 409, description: 'Email already exists' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiOperation({ summary: 'Create a new user' })
   async create(
-    @Body() req:User,
+    @Body() req: User,
     @Res() res: Response,
+    @I18n() i18n: I18nContext,
     @UploadedFiles() files: { profilePicture?: Express.Multer.File[], coverPicture?: Express.Multer.File[] }): Promise<void> {
     const userExist = await this.userService.findUser(req.email);
     if (userExist instanceof Error) {
       const newUser = await this.userService.create(req);
       if (files.profilePicture) {
-        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.profilePicture[0], newUser._id, 'profilePicture');
+        newUser.profilePicture = await this.firebaseService.uploadImageToFirebase('User_Images', files.profilePicture[0], newUser._id, 'profilePicture');
       }
       if (files.coverPicture) {
-        newUser.coverPicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.coverPicture[0], newUser._id, 'coverPicture');
+        newUser.coverPicture = await this.firebaseService.uploadImageToFirebase('User_Images', files.coverPicture[0], newUser._id, 'coverPicture');
       }
       const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
       const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
@@ -67,7 +71,7 @@ export class UserController {
       });
     }
     else {
-      res.status(409).json({message:"This Email Already Exist" ,statusCode : 409});
+      res.status(409).json({ message: i18n.t('content.EMAIL_ALREADY_EXISTS'), statusCode: 409 });
 
     }
 
@@ -77,40 +81,40 @@ export class UserController {
   @Post('/verifyotp')
   @UseGuards(ExistGuard(UserService))
   @ApiOperation({ summary: 'Verify OTP for a user' })
-  @ApiResponse({ status: 200, description: 'User successfully verified' }) 
-  @ApiResponse({ status: 400, description: 'Bad Request' }) 
-  @ApiResponse({ status: 401, description: 'Unauthorized' }) 
+  @ApiResponse({ status: 200, description: 'User successfully verified' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async verifyOtp(@Body() req: { email: string, otp: string }, @Res() res: Response): Promise<void> {
+  async verifyOtp(@Body() req: { email: string, otp: string }, @Res() res: Response, @I18n() i18n: I18nContext): Promise<void> {
     const { email, otp } = req;
     const user = await this.userService.findUser(email);
-      if (otp === user.otp) {
-        user.isVerified = true;
-        const newUser = await this.userService.update(user);
-        const newtoken = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
-        const newRefreshToke = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
+    if (otp === user.otp) {
+      user.isVerified = true;
+      const newUser = await this.userService.update(user);
+      const newtoken = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
+      const newRefreshToke = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
 
-        await this.userService.updateToken(newUser._id, newRefreshToke);
+      await this.userService.updateToken(newUser._id, newRefreshToke);
 
-        res.setHeader(process.env.REFRESH_TOKEN_NAME, newRefreshToke).setHeader(process.env.JWT_TOKEN_NAME, newtoken).status(200).json({message:"User successfully verified",statudCode : 200});
-      } else {
-        res.status(401).json({message:"Invalid OTP",statudCode : 401});
-      }
+      res.setHeader(process.env.REFRESH_TOKEN_NAME, newRefreshToke).setHeader(process.env.JWT_TOKEN_NAME, newtoken).status(200).json({ message: "User successfully verified", statudCode: 200 });
+    } else {
+      res.status(401).json({ message: i18n.t('content.INVALID_OTP'), statudCode: 401 });
+    }
   }
 
 
   @Get('/login')
   @UseGuards(ExistGuard(UserService))
   @ApiResponse({ status: 200, description: 'User logged in successfully' })
-  @ApiResponse({ status: 400, description: 'Bad Request' }) 
-  @ApiResponse({ status: 401, description: 'Unauthorized' }) 
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiOperation({ summary: 'User login' })
-  async login(@Body() req: { email: string, password: string }, @Res() res: Response): Promise<void> {
+  async login(@Body() req: { email: string, password: string }, @Res() res: Response,@I18n() i18n: I18nContext): Promise<void> {
     const user = await this.userService.findUser(req.email)
     if (user.password == undefined) {
-      res.status(403).json("Try To Login With Google And Update Your Credentials")
-
+      res.status(403).json({  message:  i18n.t('content.LOGIN_WITH_GOOGLE' ), statusCode: 403 });
+      
     }
     else {
       const isMatch = await PasswordValidator.Match(req.password, user.password)
@@ -126,7 +130,7 @@ export class UserController {
         })
       }
       else {
-        res.status(401).json({message:"Wrong Password Please Try Again :(" ,statusCode : 401});
+        res.status(401).json({  message:  i18n.t('content.WRONG_PASSWORD' ), statusCode: 401 });
       }
     }
 
@@ -138,12 +142,12 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
   @ApiResponse({ status: 200, description: 'No users found' })
-  async findAll(@Res() res: Response): Promise<void> {
+  async findAll(@Res() res: Response,@I18n() i18n: I18nContext): Promise<void> {
     const users = await this.userService.findAll();
     if (users.length === 0) {
-      res.status(200).json({ message: 'No users found' , statusCode : 200});
+      res.status(200).json({ message: i18n.t('content.NO_USERS_FOUND'), statusCode: 200 });
     } else {
-      res.status(200).json({message:users , statusCode : 200});
+      res.status(200).json({ message: users, statusCode: 200 });
     }
   }
 
@@ -162,11 +166,13 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiOperation({ summary: 'Update a user' })
   async updateUser(
-    @Body() user: UserUpdates, 
-    @Param('id') id: string, 
+    @Body() user: UserUpdates,
+    @Param('id') id: string,
     @Res() res: Response,
-    @UploadedFiles() files: { profilePicture?: Express.Multer.File[], coverPicture?: Express.Multer.File[] },
-    ): Promise<void> {
+    @I18n() i18n: I18nContext,
+    @UploadedFiles() files: { profilePicture?: Express.Multer.File[], coverPicture?: Express.Multer.File[]
+     },
+  ): Promise<void> {
     if (user.password) {
       user.password = await PasswordValidator.hashPassword(user.password)
     }
@@ -177,14 +183,14 @@ export class UserController {
       user.isVerified = false
     }
     if (files.profilePicture) {
-      user.profilePicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.profilePicture[0], id, 'profilePicture');
+      user.profilePicture = await this.firebaseService.uploadImageToFirebase('User_Images', files.profilePicture[0], id, 'profilePicture');
     }
     if (files.coverPicture) {
-      user.coverPicture = await this.firebaseService.uploadImageToFirebase('User_Images',files.coverPicture[0], id, 'coverPicture');
+      user.coverPicture = await this.firebaseService.uploadImageToFirebase('User_Images', files.coverPicture[0], id, 'coverPicture');
     }
     await this.userService.updateUser(user, id);
 
-    res.status(200).json({message:"User Updated Successfully" , statusCode: 200});
+    res.status(200).json({ message: i18n.t('content.USER_UPDATED_SUCCESSFULLY'), statusCode: 200 });
   }
 
 
@@ -203,13 +209,13 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User logged in successfully' })
   @ApiResponse({ status: 302, description: 'Redirect to login page with an error' })
   @ApiOperation({ summary: 'Google authentication callback' })
-  async googleAuthRedirect(@Req() req, @Res() res) {
+  async googleAuthRedirect(@Req() req, @Res() res,@I18n() i18n: I18nContext) : Promise<void> {
     const user = req.user;
     if (user) {
       const userExist = await this.userService.findUser(user.email);
       if (userExist instanceof Error) {
         const newUser = await this.userService.create(user);
-        const token = await this.jwtService.generateToken(newUser,process.env.ACCESS_TOKEN_EXPIRATION_TIME);
+        const token = await this.jwtService.generateToken(newUser, process.env.ACCESS_TOKEN_EXPIRATION_TIME);
         const refreshToken = await this.jwtService.generateToken(newUser, process.env.REFRESH_TOKEN_EXPIRATION_TIME);
         newUser.refreshToken = refreshToken;
         await newUser.save();
@@ -250,17 +256,17 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async requestPasswordReset(@Body() req: { email: string }, @Res() res: Response): Promise<void> {
+  async requestPasswordReset(@Body() req: { email: string }, @Res() res: Response,@I18n() i18n: I18nContext): Promise<void> {
     const user = await this.userService.findUser(req.email);
     if (user instanceof Error) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: i18n.t('content.USER_NOT_FOUND'), statusCode: 404 });
     }
     else {
       const resetcode = this.otpService.generateOTP()
       await this.mailerService.sendPasswordResetEmail(user.email, resetcode.otp);
       user.resetcode = resetcode.otp
       await user.save();
-      res.status(200).json({ message: 'Password reset request sent successfully' });
+      res.status(200).json({ message: i18n.t('content.PASSWORD_RESET_REQUEST_SENT_SUCCESSFULLY'), statusCode: 200 });
     }
   }
 
@@ -270,18 +276,18 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async resetPassword(@Body() req: { email: string, password: string , resetcode : string}, @Res() res: Response): Promise<void> {
+  async resetPassword(@Body() req: { email: string, password: string, resetcode: string }, @Res() res: Response,@I18n() i18n: I18nContext): Promise<void> {
     const user = await this.userService.findUser(req.email);
     if (user instanceof Error) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: i18n.t('content.USER_NOT_FOUND'), statusCode: 404 });
     }
     else if (user.resetcode != req.resetcode) {
-      res.status(400).json({ message: 'Invalid reset code' });
+      res.status(400).json({ message: i18n.t('content.INVALID_CODE'), statusCode: 400 });
     }
     else {
       user.password = await PasswordValidator.hashPassword(req.password);
       await user.save();
-      res.status(200).json({ message: 'Password reset successful' });
+      res.status(200).json({ message: i18n.t('content.PASSWORD_RESET_SUCCESSFULLY'), statusCode: 200 });
     }
   }
 
@@ -295,11 +301,11 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'FCM Token updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async getFcmToken(@Param('id') id: string, @Body() req: { fcmToken: string }, @Res() res: Response): Promise<void> {
+  async getFcmToken(@Param('id') id: string, @Body() req: { fcmToken: string }, @Res() res: Response,@I18n() i18n: I18nContext): Promise<void> {
     const user = await this.userService.findByid(id);
-      user.fcmToken = req.fcmToken;
-      await user.save();
-      res.status(200).json({ message: 'FCM Token updated successfully' });
+    user.fcmToken = req.fcmToken;
+    await user.save();
+    res.status(200).json({ message: i18n.t('content.FCM_TOKEN_UPDATED_SUCCESSFULLY'), statusCode: 200 });
   }
 
 }

@@ -3,10 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../model/user.model';
 import { UserService } from '../user-auth/user.service';
-
+import { I18nService } from 'nestjs-i18n';
 @Injectable()
 export class UserOperationsService {
-    constructor(private readonly userService: UserService) { }
+    constructor(private readonly userService: UserService,
+        private readonly i18n: I18nService
+        
+        ) { }
     async delete(id: string): Promise<string | Error> {
         const user = await this.userService.deleteUser(id);
         if (user instanceof Error) {
@@ -61,6 +64,16 @@ export class UserOperationsService {
 
 
 
+    }
+
+    async getprofile(currentuser: string): Promise<User | Error> {
+        const user = await this.userService.findUser(currentuser);
+        if (user instanceof Error) {
+            return new Error("User Not Found");
+        }
+        else {
+            return user;
+        }
     }
 
     async getfollowers(currentuser: string): Promise<string[] | Error> {
