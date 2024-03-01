@@ -1,93 +1,44 @@
+
+# Nest Wave | Mobile Application (Circle Sync In TS)
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+<a href="https://imgur.com/eX4ylSZ"><img src="https://i.imgur.com/eX4ylSZ.png" title="source: imgur.com" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Nest Wave is a vibrant social media mobile application that facilitates user connections, content sharing, and meaningful interactions within dedicated interest-based spaces. It operates similarly to Facebook but with a focus on creating a space for users to connect around their interests.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-<!-- ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+## Responsibilities
+During my involvement with Nest Wave, I had the following responsibilities:
+- Designed and implemented RESTful APIs to enable seamless communication between the mobile application and the server.
+- Leveraged Node.js and Express.js to create a robust and scalable backend, ensuring optimal performance.
+- Implemented user authentication and authorization mechanisms to safeguard user data and privacy.
+- Developed and maintained a MongoDB database for efficient storage and management of user-generated content and application data.
+- Integrated Firebase Cloud Messaging to provide real-time notifications, enhancing user engagement and overall experience.
+- Collaborated closely with mobile app developers to ensure smooth cross-platform integration.
+- Implemented comprehensive testing via both unit tests and integration tests to validate individual modules as well as interoperability across connected components, enabling robust and maintainable code.
 
+## Project Technologies & Tools
+The project utilized the following technologies and tools:
+- Node.js
+- Express.js
+- Jest
+- MongoDB
+- Firebase Cloud Messaging
+- Git
+- Docker
+
+### To Run App 
+Run the following command and ensure that you have Docker on your machine
 ```bash
-$ npm install
-``` -->
-## Prerequisites
-Before you begin, ensure that you have the following prerequisites installed:
-- Docker: [Install Docker](https://docs.docker.com/get-docker/)
-
-## Steps To Build Image 
-
-```bash
-#step #1 after clone the project and unzip it  open cmd in the project folder
-$ cd NestWave
-
-#step #2 build image
-$ docker build -t CycleSync-Image .
-
-#step #3 run docker container
-$ docker run -p 3000:80 CycleSync-Image
-
-```
-## Done Happy Dockerizing!
-
-- With these modifications, your Docker container will be accessible on port 3000 of the host machine.
-
-## Note 
-
-- to see all apis click [here](http://localhost:3000/apis) after you do the two steps 
-<!-- ## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ docker-compose up
 ```
 
-## Test
+## 
 
-```bash
-# unit tests
-$ npm run test
+- Feel free to explore the code, documentation, and the exciting features developed during the Nest Wave project. If you have any questions or would like to collaborate, please don't hesitate to get in touch.
 
-# e2e tests
-$ npm run test:e2e
+Enjoy your exploration! 
 
-# test coverage
-$ npm run test:cov
-```
- -->
-
-
-
-## Stay in touch
-
-- Author - [Nayf Serag](https://www.facebook.com/nayf.serag.9)
-- Linkedin - [Nayf Serag](https://www.linkedin.com/in/nayf-serag-70a3611b8)
-
-
-# NESTWAVE
