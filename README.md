@@ -31,9 +31,9 @@ The project utilized the following technologies and tools:
 - Docker
 
 ### To Run App 
-Run the following command and ensure that you have Docker on your machine
+Run the following command 
 ```bash
-$ docker-compose up
+$ npm run start
 ```
 
 ## 
