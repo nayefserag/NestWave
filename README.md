@@ -2,7 +2,7 @@
 # Nest Wave | Mobile Application (Circle Sync In TS)
 
 <p align="center">
-<a href="https://imgur.com/eX4ylSZ"><img src="https://i.imgur.com/eX4ylSZ.png" title="source: imgur.com" /></a>
+<a href="nestwave.png"><img src="nestwave.png" title="source: imgur.com" /></a>
 </p>
 
 Nest Wave is a vibrant social media mobile application that facilitates user connections, content sharing, and meaningful interactions within dedicated interest-based spaces. It operates similarly to Facebook but with a focus on creating a space for users to connect around their interests.
