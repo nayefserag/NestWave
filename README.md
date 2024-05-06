@@ -1,6 +1,4 @@
-
-# Nest Wave | Mobile Application (Circle Sync In TS)
-
+<h1 align="center">Nest Wave | Mobile Application (Circle Sync In TS)</h1>
 <p align="center">
 <a href="nestwave.png"><img src="nestwave.png" title="source: imgur.com" /></a>
 </p>
