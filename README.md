@@ -5,6 +5,7 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![CI](https://github.com/nayefserag/NestWave/actions/workflows/ci.yml/badge.svg)
 
 A scalable **NestJS** backend for an interest-based social app — secure authentication, real-time notifications, media uploads, and internationalization.
 
