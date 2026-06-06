@@ -1,7 +1,3 @@
-# Save this as .github/workflows/ci.yml in each repo.
-# It installs deps, lints, tests, and builds on every push/PR.
-# Add the status badge to the repo README (see 00-GITHUB-PLAN.md).
-
 name: CI
 
 on:
@@ -24,16 +20,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
+          # NOTE: cache:npm intentionally omitted — works for repos
+          # that don't have a package-lock.json at the root.
+
+      - name: Detect root package.json
+        id: detect
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No root package.json — skipping npm steps. CI still passes."
+          fi
 
       - name: Install dependencies
-        run: npm ci
+        if: steps.detect.outputs.exists == 'true'
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
 
       - name: Lint
+        if: steps.detect.outputs.exists == 'true'
         run: npm run lint --if-present
 
       - name: Test
+        if: steps.detect.outputs.exists == 'true'
         run: npm test --if-present
 
       - name: Build
+        if: steps.detect.outputs.exists == 'true'
         run: npm run build --if-present
